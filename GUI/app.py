@@ -69,6 +69,17 @@ class InvoiceApp(ctk.CTk):
         self.elec_curr_entry.grid(row=3, column=1, sticky='e', padx=10, pady=5)
         self.elec_curr_entry.insert(0, '636')
 
+        # ปุ่มคำนวณ
+        self.calculate_button = ctk.CTkButton(self.main_frame, text='คำนวณยอดบิล',
+                                command=self.calculate_invoice) # <-- เชื่อมปุ่มกับฟังก์ชัน
+        self.calculate_button.pack(pady=20, ipady=10)
+
+        # ช่องแสดงผลลัพธ์
+        self.result_frame = ctk.CTkFrame(self.main_frame, fg_color='#2D2D2D')
+        self.result_frame.pack(pady=10, padx=10, fill='x')
+
+        self.result_label_title = ctk.CTkLabel(self.result_frame, text='ยอดรวมสุทธิ:', font=ctk.CTkFont(size=16))
+        self.result_label_title.grid(row=0, column=0, padx=10, pady=10)
         
         
         
