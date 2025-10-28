@@ -40,12 +40,35 @@ class InvoiceApp(ctk.CTk):
         self.tenant_entry.grid(row=0, column=1, padx=10, pady=5)
         self.tenant_entry.insert(0, 'รักสำราญ สุขรุ่งเรือง')
         
-        self.room_number_label = ctk.CTkLabel(self.form_frame, text='หมายเลขห้อง:')
-        self.room_number_label.grid(row=1, column=1, sticky='w', padx=10, pady=5)
+        self.room_number_label = ctk.CTkLabel(self.form_frame, text='เลขห้อง:')
+        self.room_number_label.grid(row=1, column=0, sticky='w', padx=10, pady=5)
         self.room_number_entry = ctk.CTkEntry(
             self.form_frame, placeholder_text='เช่น N01 / 101', width=250)
         self.room_number_entry.grid(row=1, column=1, padx=10, pady=5)
         self.room_number_entry.insert(1, 'N01 / 101')
+
+        # มิเตอร์น้ำ ก่อน - ปัจจุบัน
+        self.water_label = ctk.CTkLabel(self.form_frame, text='มิเตอร์น้ำ (ก่อน - ปัจจุบัน):')
+        self.water_label.grid(row=2, column=0, sticky='w', padx=10, pady=5)
+        self.water_prev_entry = ctk.CTkEntry(self.form_frame, width=60)
+        self.water_prev_entry.grid(row=2, column=1, sticky='w', padx=10, pady=5)
+        self.water_prev_entry.insert(0, '675')
+
+        self.water_curr_entry = ctk.CTkEntry(self.form_frame, width=60)
+        self.water_curr_entry.grid(row=2, column=1, sticky='e', padx=10, pady=5)
+        self.water_curr_entry.insert(0, '681') 
+
+        # ค่ามิเตอร์ไฟฟ้า ก่อน - ปัจจุบัน
+        self.elec_label = ctk.CTkLabel(self.form_frame, text="มิเตอร์ไฟฟ้า (ก่อน - ปัจจุบัน)")
+        self.elec_label.grid(row=3, column=0, sticky='w', padx=10, pady=5)
+        self.elec_prev_entry = ctk.CTkEntry(self.form_frame, width=60)
+        self.elec_prev_entry.grid(row=3, column=1, sticky='w', padx=10, pady=5)
+        self.elec_prev_entry.insert(0, '591')
+
+        self.elec_curr_entry = ctk.CTkEntry(self.form_frame, width=60)
+        self.elec_curr_entry.grid(row=3, column=1, sticky='e', padx=10, pady=5)
+        self.elec_curr_entry.insert(0, '636')
+
         
         
         
