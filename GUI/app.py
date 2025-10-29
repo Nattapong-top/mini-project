@@ -40,8 +40,8 @@ class InvoiceApp(ctk.CTk):
         self.tenant_entry.grid(row=0, column=1, padx=10, pady=5)
         self.tenant_entry.insert(0, 'รักสำราญ สุขรุ่งเรือง')
         
-        self.room_number_label = ctk.CTkLabel(self.form_frame, text='หมายเลขห้อง:')
-        self.room_number_label.grid(row=1, column=1, sticky='w', padx=10, pady=5)
+        self.room_number_label = ctk.CTkLabel(self.form_frame, text='เลขห้อง:')
+        self.room_number_label.grid(row=1, column=0, sticky='w', padx=10, pady=5)
         self.room_number_entry = ctk.CTkEntry(
             self.form_frame, placeholder_text='เช่น N01 / 101', width=250)
         self.room_number_entry.grid(row=1, column=1, padx=10, pady=5)
@@ -54,6 +54,6 @@ if __name__ == '__main__':
     # สร้างหน้าต่างโปรแกรม
     app = InvoiceApp()      # สร้างหน้าต่างโปรแกรม
     app.mainloop()          # รันโปรแกรม
-    
+      
     
     
