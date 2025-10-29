@@ -5,7 +5,6 @@ from tkinter import messagebox
 from Invoice import Invoice 
 
 class InvoiceApp(ctk.CTk):
-    
     def __init__(self):
         super().__init__()
         
