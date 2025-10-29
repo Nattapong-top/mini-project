@@ -53,18 +53,18 @@ class InvoiceApp(ctk.CTk):
         self.water_prev_entry.grid(row=2, column=1, sticky='w', padx=10, pady=5)
         self.water_prev_entry.insert(0, '675')
 
-        self.water_curr_entry = ctk.CTkEntry(self.form_frame, width=60)
+        self.water_curr_entry = ctk.CTkEntry(self.form_frame, width=120)
         self.water_curr_entry.grid(row=2, column=1, sticky='e', padx=10, pady=5)
         self.water_curr_entry.insert(0, '681') 
 
         # ค่ามิเตอร์ไฟฟ้า ก่อน - ปัจจุบัน
         self.elec_label = ctk.CTkLabel(self.form_frame, text="มิเตอร์ไฟฟ้า (ก่อน - ปัจจุบัน)")
         self.elec_label.grid(row=3, column=0, sticky='w', padx=10, pady=5)
-        self.elec_prev_entry = ctk.CTkEntry(self.form_frame, width=60)
+        self.elec_prev_entry = ctk.CTkEntry(self.form_frame, width=120)
         self.elec_prev_entry.grid(row=3, column=1, sticky='w', padx=10, pady=5)
         self.elec_prev_entry.insert(0, '591')
 
-        self.elec_curr_entry = ctk.CTkEntry(self.form_frame, width=60)
+        self.elec_curr_entry = ctk.CTkEntry(self.form_frame, width=120)
         self.elec_curr_entry.grid(row=3, column=1, sticky='e', padx=10, pady=5)
         self.elec_curr_entry.insert(0, '636')
 
@@ -103,7 +103,7 @@ class InvoiceApp(ctk.CTk):
             w_prev = int(self.water_prev_entry.get())
             w_curr = int(self.water_curr_entry.get())
             e_prev = int(self.elec_prev_entry.get())
-            e_curr = int(self.elec_prev_entry.get())
+            e_curr = int(self.elec_curr_entry.get())
 
             # ข้อมูลคงที่จากบิล
             rent = 2800.00
@@ -133,7 +133,7 @@ class InvoiceApp(ctk.CTk):
             self.result_label_value.configure(text=f'{total:,.2f} บาท')
 
             # สร้างข้อความสำเร็จรูป
-            details_text = f'ค่าห้อง: {invoice_obj.room_rent:,.2f} | ค่าที่จอดรถ: {invoice_obj.parking_fee:,.f2}\n'
+            details_text = f'ค่าห้อง: {invoice_obj.room_rent:,.2f} | ค่าที่จอดรถ: {invoice_obj.parking_fee:,.2f}\n'
             details_text += f'ค่าน้ำ: {invoice_obj.water_units} หน่วย = {invoice_obj.water_cost:,.2f} บาท\n'
             details_text += f'ค่าไฟฟ้า: {invoice_obj.electric_units} หน่วย = {invoice_obj.electric_cost:,.2f} บาท\n'
 
