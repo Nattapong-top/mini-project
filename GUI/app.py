@@ -2,15 +2,22 @@ import customtkinter as ctk
 import datetime
 from tkinter import messagebox
 
-from Invoice import Invoice 
+from Invoice import Invoice
+import database 
 
 class InvoiceApp(ctk.CTk):
     def __init__(self):
         super().__init__()
         
         self.title('โปรแกรมบันทึกบิลค่าเช่า')
-        self.geometry('500x700')
-    
+        self.geometry('500x750')
+
+        # ตัวแปรสำหรับเก็บ object บิลล่าสุด
+        self.current_invoice: Invoice | None = None
+
+        # เรียกใช้ database 1 ครั้งต่อการเรียกใช้โปรแกรม
+        database.init_db()
+
         # ตั้งค่า Theme ให้ดูทันสมัย
         ctk.set_appearance_mode('Dark')
         ctk.set_default_color_theme('blue')
@@ -68,10 +75,22 @@ class InvoiceApp(ctk.CTk):
         self.elec_curr_entry.grid(row=3, column=1, sticky='e', padx=10, pady=5)
         self.elec_curr_entry.insert(0, '636')
 
+        # สร้าง Frame สำหรับวางปุ่มคู่กัน
+        self.button_frame =ctk.CTkFrame(self.main_frame, fg_color='transparent')
+        self.button_frame.pack(pady=20, )
+
+        # ย้ายปุ่มคำนวณมาไว้ใน Frame
         # ปุ่มคำนวณ
-        self.calculate_button = ctk.CTkButton(self.main_frame, text='คำนวณยอดบิล',
+        self.calculate_button = ctk.CTkButton(self.button_frame, text='คำนวณยอดบิล',
                                 command=self.calculate_invoice) # <-- เชื่อมปุ่มกับฟังก์ชัน
-        self.calculate_button.pack(pady=20, ipady=10)
+        self.calculate_button.pack(side='left', pady=20, ipady=10)
+
+        # เพิ่มปุ่มบันทึก แสดงตอนที่คำนวณเสร็จแล้ว
+        self.save_button = ctk.CTkButton(self.button_frame, text='บันทึกลงฐานข้อมูล',
+                                         command=self.save_to_database, # เชื่อมฟังก์ชั่นไปยัง database
+                                         state='disabled',              # ปิดไว้ก่อน 
+                                         fg_color='green', hover_color='#008A00')
+        self.save_button.pack(side='left', padx=5, ipady=10)
 
         # ช่องแสดงผลลัพธ์
         self.result_frame = ctk.CTkFrame(self.main_frame, fg_color='#2D2D2D')
@@ -92,6 +111,10 @@ class InvoiceApp(ctk.CTk):
     def calculate_invoice(self):
         ''' ฟังก์ชันการคำนวณยอดบิลค่าเช่าห้อง '''
         print('กำลังคำนวณ...')
+
+        # ล้าง object เก่า และ ปิดปุ่มบันทึก ก่อนคำนวณฃ
+        self.current_invoice = None
+        self.save_button.configure(state='disabled')
 
         try:
             # ดึงข้อมูลจากช่องกรอก ที่เป็นข้อมูล string
@@ -139,6 +162,10 @@ class InvoiceApp(ctk.CTk):
 
             self.details_label.configure(text=details_text)
 
+            #  ถ้าคำนวณสำเร็จ
+            self.current_invoice = invoice_obj              # เก็บ object บิลนี้ไว้
+            self.save_button.configure(state='normal')      # เปิดปุ่มบันทึก
+
         except ValueError as e:
             # ตรวจจับข้อผิดพลาด ป้องกันโปรแกรม error และจบการทำงาน
             print(f'เกิดข้อผิดพลาด: {e}')
@@ -154,7 +181,29 @@ class InvoiceApp(ctk.CTk):
             # ดักจับ Error ทั่วไปที่ไม่ได้คาดคิด
             messagebox.showerror('ผิดพลาดไม่ทราบสาเหตุ', str(e))
 
+    def save_to_database(self):
+        ''' ถูกเรียกเมือกดปุ่ม 'บันทึก' '''
+        if self.current_invoice is None:
+            messagebox.showwarning('ยังไม่คำนวณ', 'กรุณากด "คำนวณยอดบิล" ก่อนบันทึก')
+            return
+        print(f'กำลังบันทึกบิลของ: {self.current_invoice.tenant_name}')
+
+        try:
+            # เรียกใช้ฟังก์ชันจาก 'database.py
+            success = database.add_invoice(self.current_invoice)
+
+            if success:
+                messagebox.showinfo('สำเร็จ', 'บันทึกข้อมูลลงฐานข้อมูลเรียบร้อย!')
+                # ปิดปุ่มอีกครั้ง กันการกดบันทึกซ้ำ
+                self.save_button.configure(state='disaled')
+                self.current_invoice = None
+            else:
+                messagebox.showerror('ล้มเหลว', 'ไม่สามารถบันทึกข้อมูลได้ (ดูที่ console)')
         
+        except Exception as e:
+            messagebox.showerror('ผิดพลาดร้ายแรง', f'เกิดข้อผิดพลาดขณะเชื่อมต่อฐานข้อมูล: {e}')
+
+
 if __name__ == '__main__':
     
     # สร้างหน้าต่างโปรแกรม

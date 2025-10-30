@@ -14,7 +14,7 @@ def init_db():
         # สร้างตารางชื่อ 'invoices'
         # เก็บข้อมูลสำคัญไว้ใน database 
         cursor.execute("""
-        CREATE TABALE IF NOT EXISTS invoices (
+        CREATE TABLE IF NOT EXISTS invoices (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             tenant_name TEXT NOT NULL,
             room_number TEXT,
@@ -29,7 +29,7 @@ def init_db():
 
         conn.commit()
         conn.close()
-        print("ฐานข้อมูล '{DB_FILE}' พร้อมใช้งาน")
+        print(f"ฐานข้อมูล '{DB_FILE}' พร้อมใช้งาน")
 
     except sqlite3.Error as e:
         print(f'เกิดข้อผิดพลาดกับฐานข้อมูล: {e}')
@@ -57,7 +57,7 @@ def add_invoice(invoice_obj: Invoice):
 
         # ใช้ "?" (placeholders) เพื่อป้องกัน SQL Injection
         sql = """
-        INSERT INTO invoines
+        INSERT INTO invoices
         (tenant_name, room_number, invoice_date, water_units,
         electric_units, water_cost, electric_cost, grand_total)        
         VALUES (?, ?, ?, ?, ?, ?, ?, ?)
