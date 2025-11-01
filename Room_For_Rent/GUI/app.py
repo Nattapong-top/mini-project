@@ -62,7 +62,7 @@ class InvoiceApp(ctk.CTk):
 
         self.water_curr_entry = ctk.CTkEntry(self.form_frame, width=120)
         self.water_curr_entry.grid(row=2, column=1, sticky='e', padx=10, pady=5)
-        self.water_curr_entry.insert(0, '681') 
+        self.water_curr_entry.insert(0, '681')
 
         # ค่ามิเตอร์ไฟฟ้า ก่อน - ปัจจุบัน
         self.elec_label = ctk.CTkLabel(self.form_frame, text="มิเตอร์ไฟฟ้า (ก่อน - ปัจจุบัน)")
