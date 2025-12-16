@@ -4,6 +4,8 @@ import os
 script_dir = os.path.dirname(__file__)
 # สร้าง path ของ menu.txt โดยอิงจากที่อยูของ main.py
 file_path = os.path.join(script_dir, 'menu.txt')
+file_sales = os.path.join(script_dir, 'sales.txt')
+
 
 def loal_menu(filename:str):
     '''
@@ -32,6 +34,16 @@ def show_menu(menu_list):
         print( f'{i+1}. {p[0]}{p[1]:>10}')
 
 show_menu(menu_list)
+
+
+def save_sale(items, total):
+    '''
+    บันทึกรายการขายลงไฟล์ sales.txt
+    '''
+    # เปิดไฟล์ sales.txt ในโหมด 'a' (append) เพื่อต่อท้ายข้อมูลเดิม
+    # เขียนวันที่ (ถ้าทำได้) หรือเขียนแค่รายการและราคารวม
+    with open(file_sales) as sale_list:
+        sale_list.write(items, total)
 
 
 
