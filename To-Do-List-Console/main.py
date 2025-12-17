@@ -11,7 +11,7 @@ file_path = os.path.join(script_dir)
 def load_tasks(filename):
     tasks = []
 
-    if not os.path.exists(filename):
+    if os.path.exists(filename):
         with open(filename, encoding='utf-8') as f:
             for line in f:
                 # ตัดช่องว่าง ซ้าย ขวา แล้วเก็บใส่ list เลย ไม่ต้อง split
@@ -53,3 +53,33 @@ def remove_task(tasks):
             print(f'  ลบ \'{removed}\' ออกแล้ว!')
         else:
             print('❌ ไม่มีงานนี้นะครับ')
+
+def save_tasks(filename, tasks):
+    with open(filename, 'w', encoding='utf-8') as f:
+        for t in tasks:
+            f.write(t + '\n') # เขียนทีละบรรทัด
+    print('💾 บันทึกข้อมูลลงไฟล์เรียบร้อย!')
+
+
+def main():
+    filename = file_path + '\\todo.txt'
+    my_tasks = load_tasks(filename)
+
+    while True:
+        show_tasks(my_tasks)
+        print('[A] เพิ่มงาน [D] ลบงาน [Q] บันทึกและจบโปรแกรม')
+        action = input('เลือกคำสั่ง: ').upper() # แปลงเป็นตัวพิมพ์ใหญ่หมด
+
+        if action == 'A':
+            add_task(my_tasks)
+        elif action == 'D':
+            remove_task(my_tasks)
+        elif action == 'Q':
+            save_tasks(filename, my_tasks)
+            print('ออกจากโปรแกรม')
+            break
+        else:
+            print('พิมพ์ไม่ถูกต้อง พิมพ์ใหม่ครับ')
+
+if __name__ == '__main__':
+    main()
