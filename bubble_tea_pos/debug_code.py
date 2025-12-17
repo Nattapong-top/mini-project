@@ -39,7 +39,8 @@ def save_sale(items, total):
     # เขียนวันที่ (ถ้าทำได้) หรือเขียนแต่รายการและราคารวม
     filename = 'sales.txt'
     with open(filename, 'a', encoding='utf-8') as data:
-        data.write(datetime.time.datetime, items, total)
+        for e in zip(items, total):
+            data.write([e])
 
 
 def main():
@@ -59,26 +60,32 @@ def main():
     while True:
         # --- ส่วนแสดงผลและรับคำสั่ง ---
         show_menu(my_menu)
-        print(f"\nรายการปัจจุบัน: {orders}")
-        print(f"ราคารวม: {total_price} บาท\n")
-        
+
         choice = input("เลือกเมนู (ใส่เลข) หรือพิมพ์ 'q' เพื่อจบ/คิดเงิน: ")
-        
         if choice == 'q':
             break
-            
-        # --- ส่วนประมวลผล (Logic) ---
-        # 1. ตรวจสอบว่า choice เป็นตัวเลขไหม
-        # 2. แปลงเป็น index ของ list (ระวังเรื่อง index เริ่มที่ 0 แต่เมนูเราอาจจะโชว์เลข 1)
-        # 3. ดึงชื่อและราคาจาก my_menu มาบวกใส่ orders และ total_price
+        elif choice.isdigit():
+            if choice == '1':
+                orders.append(my_menu[int(choice)-1])
+                #total_price += my_menu[1]
+
+        print(f"\nรายการปัจจุบัน: {orders}")
+        print(f"ราคารวม: {total_price} บาท\n")
+
+#         # --- ส่วนประมวลผล (Logic) ---
+#         # 1. ตรวจสอบว่า choice เป็นตัวเลขไหม
+#         if choice.isdigit():
+#         # 2. แปลงเป็น index ของ list (ระวังเรื่อง index เริ่มที่ 0 แต่เมนูเราอาจจะโชว์เลข 1)
+#             if choice == my_menu[0]:
+#         # 3. ดึงชื่อและราคาจาก my_menu มาบวกใส่ orders และ total_price
         
-    # --- ส่วนจบการทำงาน ---
-    if total_price > 0:
-        print(f"\n>>> สรุปยอดเงินทั้งสิ้น: {total_price} บาท <<<")
-        save_sale(orders, total_price)
-        print("บันทึกยอดขายเรียบร้อย! ขอบคุณที่อุดหนุนครับ")
-    else:
-        print("ไม่ได้มีการสั่งซื้อ")
+#     # --- ส่วนจบการทำงาน ---
+#     if total_price > 0:
+#         print(f"\n>>> สรุปยอดเงินทั้งสิ้น: {total_price} บาท <<<")
+#         save_sale(orders, total_price)
+#         print("บันทึกยอดขายเรียบร้อย! ขอบคุณที่อุดหนุนครับ")
+#     else:
+#         print("ไม่ได้มีการสั่งซื้อ")
 
 # เรียกใช้งานโปรแกรม
 if __name__ == "__main__":
