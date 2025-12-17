@@ -32,6 +32,24 @@ def show_tasks(tasks):
             print(f'{i+1}. {t}')
     print("="*20 + '\n')
 
-'''---> ทดลองรันไฟล์ <---'''
-my_tasks = load_tasks('todo.txt')
-show_tasks(my_tasks)
+# '''---> ทดลองรันไฟล์ <---'''
+# my_tasks = load_tasks('todo.txt')
+# show_tasks(my_tasks)
+
+def add_task(tasks):
+    new_task = input('รายการที่ต้องทำ: ')
+    if new_task:
+        tasks.append(new_task)
+        print(f'✅ เพิ่ม \'{new_task}\' เรียบร้อย!')
+
+def remove_task(tasks):
+    show_tasks(tasks) # show ก่อนจะได้รู้ว่าจะลบตัวไหน
+    choice = input('เลือกเบอร์ที่จะลบ (หรือกด Enter เพื่อยกเลิก): ')
+
+    if choice.isdigit():
+        index = int(choice) - 1
+        if 0 <= index < len(tasks):
+            removed = tasks.pop(index) # ลบออกและเก็บชื่อที่ลบไว้
+            print(f'  ลบ \'{removed}\' ออกแล้ว!')
+        else:
+            print('❌ ไม่มีงานนี้นะครับ')
