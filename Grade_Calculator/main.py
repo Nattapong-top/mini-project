@@ -24,6 +24,33 @@ def save_grade(filename, name, score, grade):
     บันทึกข้อมูลต่อท้ายไฟล์ (Append)
     '''
     with open(filename, 'a', encoding='utf-8') as f:
-        for i in f:
-            f.write(i, name, score, grade, '\n')
-        
+        f.write(name, score, grade,'\n')
+    print('บันทึกข้อมูลลงในไฟล์เรียบร้อย!')
+
+def main():
+    filename = file_path + 'grades.txt'
+    print('=== โปรแกรมตัดเกรดนักเรียน ===')
+
+    while True:
+        name = input('\nชื่อนักเรียน (หรือพิมพ์ \'q\' เพื่อจบ): ')
+
+        if name == 'q':
+            break
+
+        score_str = input('คะแนนสอบ (0-100): ')
+        # ป้องกัน error: ถ้า user พิมพ์ไม่ใช่ตัวเลข
+        if not score_str.isdigit():
+            print('❌ กรุณาใส่คะแนนเป็นตัวเลขครับ')
+            continue
+    
+        score = int(score_str)
+
+        grade = calculate_grade(score)
+
+        print(f'--> คุณ {name} ได้เกรด: [{grade}]')
+        save_grade(filename, name, score, grade)
+
+    print('จบการทำงาน คำนวณเกรดเรียบร้อยครับ!')
+
+if __name__ == '__main__':
+    main()
