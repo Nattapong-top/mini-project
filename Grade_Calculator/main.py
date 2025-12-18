@@ -40,6 +40,8 @@ def show_studens(file_studens):
             
             # นับจำนวนของ list แทน การใช้ตัวแปร i+1 แบบนี้โปรแกรมจะไม่ error
             print(f'คำนวณเกรดนักเรียนจำนวน {len(studens)} คน')
+    else:
+        print(f'ยังไม่มีข้อมูลนักเรียนครับ')
 
 def main():
     filename = file_path + 'grades.txt'

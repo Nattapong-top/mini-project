@@ -2,3 +2,4 @@ nattapong, 100, A
 nontapat, 99, A
 jureporn, 70, B
 สราญรมย์, 50, D
+อนัน, 49, F
