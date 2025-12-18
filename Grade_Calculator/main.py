@@ -32,10 +32,14 @@ def show_studens(file_studens):
     print('แสดงรายชื่อนักเรียนที่เพิ่มเข้าระบบทั้งหมด')
 
     if os.path.exists(file_studens):
-        with open(file_studens, encoding='utf-8') as studens:
+        with open(file_studens, encoding='utf-8') as lines:
+            studens = lines.readlines() # อ่านทุกบรรทัดมาเก็บใน list ชื่อ studens
+
             for i, s in enumerate(studens):
                 print(f'{i+1}. {s.strip('\n')}')
-            print(f'คำนวณเกรดนักเรียนจำนวน {i+1} คน')
+            
+            # นับจำนวนของ list แทน การใช้ตัวแปร i+1 แบบนี้โปรแกรมจะไม่ error
+            print(f'คำนวณเกรดนักเรียนจำนวน {len(studens)} คน')
 
 def main():
     filename = file_path + 'grades.txt'
