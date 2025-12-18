@@ -11,15 +11,39 @@ def check_login(filename, input_user, input_pass):
     if os.path.exists(filename):
         with open(filename, encoding='utf-8') as file_login:
             for lines in file_login:
-                username, password = lines.split(',')
-            if input_user == username and input_pass == password:
-                return True
-            else:
-                return False
+                username, password = lines.strip('\n').split(',')
+                if input_user == username and input_pass == password:
+                    return True
+            return False
 
-# def main():
+def main():
 
-#     # โหลดไฟล์ xxx.txt
-#     filename = file_path + 'users.txt'
+    # โหลดไฟล์ xxx.txt
+    filename = file_path + 'users.txt'
 
-#     if not os.path.exists(filna)
+    if not os.path.exists(filename):
+        with open(filename, 'w') as f:
+            f.write('admin,123\npapa,9999\n')
+    
+    print('=== ระบบ Login ง่ายๆ ===')
+
+    attempts = 0
+    while attempts < 3:
+        user = input('Usesname: ')
+        pwd = input('Password: ')
+
+        if check_login(filename, user, pwd):
+            print(f' ยินดีตอนรับคุณ {user}!')
+            return # จบ function main (ออกจากโปรแกรม)
+        else:
+            print(' ข้อมูลไม่ถูกต้อง')
+            attempts += 1
+            print(f'เหลือโอกาศอีก {3 - attempts} ครั้ง')
+    
+    print(' ระบบล็อก! คุณใส่ผิดเกินกำหนด')
+
+if __name__ == '__main__':
+    main()
+
+    
+
