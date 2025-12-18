@@ -24,7 +24,7 @@ def save_grade(filename, name, score, grade):
     บันทึกข้อมูลต่อท้ายไฟล์ (Append)
     '''
     with open(filename, 'a', encoding='utf-8') as f:
-        f.write(name, score, grade,'\n')
+        f.write(f'{name}, {score}, {grade}\n')
     print('บันทึกข้อมูลลงในไฟล์เรียบร้อย!')
 
 def main():
