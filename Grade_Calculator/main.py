@@ -27,6 +27,16 @@ def save_grade(filename, name, score, grade):
         f.write(f'{name}, {score}, {grade}\n')
     print('บันทึกข้อมูลลงในไฟล์เรียบร้อย!')
 
+def show_studens(file_studens):
+    '''แสดงรายชื่อนักเรียนที่เพิ่มเข้าระบบทั้งหมด'''
+    print('แสดงรายชื่อนักเรียนที่เพิ่มเข้าระบบทั้งหมด')
+
+    if os.path.exists(file_studens):
+        with open(file_studens, encoding='utf-8') as studens:
+            for i, s in enumerate(studens):
+                print(f'{i+1}. {s.strip('\n')}')
+            print(f'คำนวณเกรดนักเรียนจำนวน {i+1} คน')
+
 def main():
     filename = file_path + 'grades.txt'
     print('=== โปรแกรมตัดเกรดนักเรียน ===')
@@ -49,6 +59,9 @@ def main():
 
         print(f'--> คุณ {name} ได้เกรด: [{grade}]')
         save_grade(filename, name, score, grade)
+    
+    # แสดงชื่อนักเรียนทั้งหมด
+    show_studens(filename)
 
     print('จบการทำงาน คำนวณเกรดเรียบร้อยครับ!')
 
