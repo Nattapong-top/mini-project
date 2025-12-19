@@ -11,9 +11,14 @@ def check_login(filename, input_user, input_pass):
     if os.path.exists(filename):
         with open(filename, encoding='utf-8') as file_login:
             for lines in file_login:
-                username, password = lines.strip('\n').split(',')
-                if input_user == username and input_pass == password:
-                    return True
+                # ใช้ .strip() ว่างเพื่อตัดช่องว่างและ \n ได้พร้อมกัน
+                parts = lines.strip().split(',')
+                # เช็คก่อนว่า ว่าในไฟล์มีข้อมูลสองชุดอย่างที่เราต้องการไหม
+                if len(parts) == 2:
+                    username, password = parts 
+                    if input_user == username and input_pass == password:
+                        return True
+            # วน loop จนครบแล้วไม่ตรงกันก็ให้ return False
             return False
 
 def main():
@@ -27,8 +32,8 @@ def main():
     
     print('=== ระบบ Login ง่ายๆ ===')
 
-    attempts = 0
-    while attempts < 3:
+    # เปลี่ยน loop while เป็น loop for 
+    for i in range(3):
         user = input('Usesname: ')
         pwd = input('Password: ')
 
@@ -37,13 +42,9 @@ def main():
             return # จบ function main (ออกจากโปรแกรม)
         else:
             print(' ข้อมูลไม่ถูกต้อง')
-            attempts += 1
-            print(f'เหลือโอกาศอีก {3 - attempts} ครั้ง')
+            print(f'เหลือโอกาศอีก {2 - i} ครั้ง')
     
     print(' ระบบล็อก! คุณใส่ผิดเกินกำหนด')
 
 if __name__ == '__main__':
     main()
-
-    
-
