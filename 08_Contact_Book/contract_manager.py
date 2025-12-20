@@ -42,3 +42,31 @@ def show_all_contracts(contracts:list):
             print(f'{i+1:<2} {item[0]:<20} {item[1]:<15} {item[2]:<20}')
             print('='*60)
 
+def add_contract(contracts:list):
+    '''เพิ่มรายชื่อใหม่'''
+    print('\n--- ➕ เพิ่มรายชื่อใหม่ ---')
+    name = input('ชื่อ-นามสกุล: ').strip()
+
+    # เช็คว่าชื่อว่างไหม
+    if not name:
+        print('ใส่ชื่อด้วยครับ!')
+        return
+
+    for item in contracts:
+        if item[0] == name:
+            print(f'❌ ชื่อ {name} มีอยู่แล้วครับ')
+            return
+
+    phone = input('เบอร์โทร: ').strip()
+    email = input('อีเมล (ถ้าไม่มีกด Enter): ').strip()
+
+    # ถ้าไม่มีอีเมล ให้ใส่ - แทน
+    if not email:
+        email = '-'
+
+    # เพิ่มลง list และ save
+    contracts.append([name, phone, email])
+    save_contracts(contracts)
+    print(f'✅ บันทึกคุณ {name} เรียบร้อย!')
+
+

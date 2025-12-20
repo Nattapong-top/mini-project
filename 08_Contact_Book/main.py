@@ -16,9 +16,9 @@ def main():
         choice = input('เลือกคำสั่ง: ').strip().upper()
 
         if choice == 'S':
-            pass
+            manager.show_all_contracts(my_contracts)
         elif choice == 'A':
-            pass
+            manager.add_contract(my_contracts)
         elif choice == 'U':
             pass
         elif choice == 'D':
