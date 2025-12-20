@@ -20,5 +20,25 @@ def load_contracts():
                     contract.append(parts)
     return contract
 
+def save_contracts(contracts:list):
+    '''บันทึกข้อมูลทับลงไฟล์'''
+    with open(filename, 'w', encoding='utf-8') as f:
+        for item in contracts:
+            line = ','.join(item)
+            f.write(line + '\n')
+    print('💾 บันทึกข้อมูลเรียบร้อย!')
 
+def show_all_contracts(contracts:list):
+    '''แสดงรายชื่อแบบตาราง'''
+    print('\n' + '='*60)
+    print(f"{'ชื่อ':<20} {'เบอร์โทร':<15} {'อีเมล':<20}")
+    print('='*60)
+
+    if not contracts:
+        print(" (สมุดโทรศัพท์ว่างเปล่า)")
+    else:
+        for i, item in enumerate(contracts):
+            # i=No. item[0]=ชื่อ, item[1]=เบอร์โทร, item[2]=email
+            print(f'{i+1:<2} {item[0]:<20} {item[1]:<15} {item[2]:<20}')
+            print('='*60)
 
