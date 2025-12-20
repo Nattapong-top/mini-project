@@ -90,8 +90,9 @@ def delete_contract(contracts:list):
                 break
             else:
                 print('ยกเลิกการลบครับ')
-                break
+                return
     if found:
         save_contracts(contracts)
     else:
         print('❌ ไม่พบรายชื่อนี้ครับ')
+

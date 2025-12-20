@@ -22,7 +22,7 @@ def main():
         elif choice == 'U':
             pass
         elif choice == 'D':
-            pass
+            manager.delete_contract(my_contracts)
         elif choice == 'Q':
             print('ออกจากโปรแกรม! บ๊าย บาย')
             break
