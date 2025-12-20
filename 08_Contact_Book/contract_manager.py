@@ -31,7 +31,7 @@ def save_contracts(contracts:list):
 def show_all_contracts(contracts:list):
     '''แสดงรายชื่อแบบตาราง'''
     print('\n' + '='*60)
-    print(f"{'ชื่อ':<20} {'เบอร์โทร':<15} {'อีเมล':<20}")
+    print(f"{'No.':<4} {'ชื่อ':<25} {'เบอร์โทร':<15} {'อีเมล':<20}")
     print('='*60)
 
     if not contracts:
@@ -39,7 +39,7 @@ def show_all_contracts(contracts:list):
     else:
         for i, item in enumerate(contracts):
             # i=No. item[0]=ชื่อ, item[1]=เบอร์โทร, item[2]=email
-            print(f'{i+1:<2} {item[0]:<20} {item[1]:<15} {item[2]:<20}')
+            print(f'{i+1:<4} {item[0]:<23} {item[1]:<15} {item[2]:<20}')
             print('='*60)
 
 def add_contract(contracts:list):
@@ -70,3 +70,28 @@ def add_contract(contracts:list):
     print(f'✅ บันทึกคุณ {name} เรียบร้อย!')
 
 
+def delete_contract(contracts:list):
+    '''ลบรายชื่อ'''
+    target_contract = input('ป้อนชื่อที่ต้องการลบ: ').strip()
+
+    found = False
+
+    # วันลูปหาชื่อที่จะลบ
+    for item in contracts:
+        if item[0] == target_contract:
+            print(f'เจอรายชื่อ {item[0]} เบอร์โทร {item[1]} ที่จะลบ')
+
+            confirm = input('ยืนยันการลบไหม? (y/n): ').strip().lower()
+
+            if confirm == 'y':
+                contracts.remove(item)
+                found = True
+                print('✅ ลบเรียบร้อยแล้ว!')
+                break
+            else:
+                print('ยกเลิกการลบครับ')
+                break
+    if found:
+        save_contracts(contracts)
+    else:
+        print('❌ ไม่พบรายชื่อนี้ครับ')
