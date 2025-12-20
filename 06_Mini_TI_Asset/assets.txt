@@ -1,0 +1,3 @@
+IT-001,Notebook Dell Latitude,Laptop,ปกติ
+IT-002,Printer HP LaserJet,Printer,ส่งซ่อม
+IT-003,Mouse Logitech,Accessory,ตัดจำหน่าย
