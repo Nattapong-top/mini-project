@@ -38,3 +38,25 @@ def show_all_assets(assets):
         # item[0]=รหัส, [1]=ชื่อ, [2]=ประเภท, [3]=สถานะ
         print(f'{item[0]:<10} {item[1]:<25} {item[2]:<10} {item[3]<10}')
     print('='*60)
+
+def add_asset(assets):
+    print('\n--- + เพิ่มทรัพย์สินใหม่ ---')
+    code = input('รหัสทรัพย์สิน (เช่น IT-001): ').strip()
+
+    for item in assets:
+        if item[0] == code:
+            print(' รหัสนี้เพิ่มแล้วครับ!')
+            return
+    
+    name = input('ชื่ออุปกรณ์: ').strip()
+    category = input('ประเภท (Laptop/PC/Printer): ').strip()
+    status = 'ปกติ'
+
+    # เพิ่ม List ใน RAM ก่อน
+    assets.append([code, name, category, status])
+    # บันทึกลงไฟล์ทันที
+    save_assets(assets)
+    print(f' เพื่อ {name} เข้าระบบแล้ว')
+
+# def update_status(assets):
+#     ''' Function แก้ไขสถานะ'''
