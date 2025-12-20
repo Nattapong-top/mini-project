@@ -20,7 +20,7 @@ def load_assets():
     return assets
 
 def save_assets(assets):
-    '''รับ List ทั้งหมด แล้วบันทึกทับลงไฟล์ (Mod 'w')'''
+    '''รับ List ทั้งหมด แล้วบันทึกทับลงไฟล์ (Mode 'w')'''
     with open(filename, 'w', encoding='utf-8') as f:
         for item in assets:
             # item คือ ['IT-001', 'Notebook', 'Laptop', 'ปกติ']
@@ -31,7 +31,7 @@ def save_assets(assets):
 
 def show_all_assets(assets):
     print('\n' + '='*60)
-    print(f'{'รหัส':<10} {'ชื่ออุปกรณ์':<25} {'ประเภท':<10} {'สถานะ':<10}')
+    print(f"{'รหัส':<10} {'ชื่ออุปกรณ์':<25} {'ประเภท':<10} {'สถานะ':<10}")
     print('='*60)
 
     for item in assets:
@@ -56,7 +56,7 @@ def add_asset(assets):
     assets.append([code, name, category, status])
     # บันทึกลงไฟล์ทันที
     save_assets(assets)
-    print(f'✅ เพื่อ {name} เข้าระบบแล้ว')
+    print(f'✅ เพิ่ม {name} เข้าระบบแล้ว')
 
 def update_status(assets):
     ''' Function แก้ไขสถานะ'''
