@@ -20,7 +20,7 @@ def main():
         elif choice == 'A':
             manager.add_contract(my_contracts)
         elif choice == 'U':
-            pass
+            manager.update_contract(my_contracts)
         elif choice == 'D':
             manager.delete_contract(my_contracts)
         elif choice == 'Q':

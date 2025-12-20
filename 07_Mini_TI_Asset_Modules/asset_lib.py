@@ -79,7 +79,7 @@ def update_status(assets):
         # 4. ถ้าหาเจอ ให้บันทึก List ก้อนใหม่ที่แก้ไขแล้ว ทับลงไปในไฟล์เดิม
         save_assets(assets)
     else:
-            print('❌ ไม่พบรหัสนี้ในระบบครับ')
+        print('❌ ไม่พบรหัสนี้ในระบบครับ')
 
 def delete_asset(assets):
     print('\n--- ลบรายการทรัพย์สิน ---')
