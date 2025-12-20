@@ -1,3 +1,4 @@
-IT-001,Notebook Dell Latitude,Laptop,ปกติ
-IT-002,Printer HP LaserJet,Printer,ส่งซ่อม
+IT-001,Notebook Dell Latitude,Laptop,ส่งซซ่อม
+IT-002,Printer HP LaserJet,Printer,ปกติ
 IT-003,Mouse Logitech,Accessory,ตัดจำหน่าย
+IT-004,Dell Otiplex 3080,PC,ปกติ
