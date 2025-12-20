@@ -2,3 +2,5 @@ IT-001,Notebook Dell Latitude,Laptop,ปกติ
 IT-002,Printer HP LaserJet,Printer,ปกติ
 IT-004,Dell Otiplex 3080,PC,ปกติ
 IT-005,Switch Huawei,Switch,ปกติ
+IT-006,Notebook Dell Latitude,Laptop,ปกติ
+IT-007,Dell Otiplex 3080,PC,ปกติ
