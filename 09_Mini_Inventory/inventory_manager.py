@@ -59,13 +59,15 @@ def add_product(products):
         qty = input('จำนวนเริ่มต้น: ').strip()
         if not qty.isdigit():
             print('ป้อนจำนวนเป็นตัวเลขเท่านั้นครับ')
-        break
+        else:
+            break
     
     while True:
         price = input('ราคาต่อชิ้น: ').strip()
         if not price.isdigit():
             print('ป้อนราคาเป็นตัวเลขเท่านั้นครับ')
-        break
+        else:
+            break
 
     # บันทึกเป็น string ไปก่อน (เดี๋ยวตอนคำนวณค่อยแปลง)
     products.append([code, name, qty, price])
