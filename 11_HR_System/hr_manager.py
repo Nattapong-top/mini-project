@@ -23,3 +23,11 @@ def load_employees():
                 employees.append(parts)
     return employees
 
+def seve_employees(employees:list):
+    '''บันทึกข้อมูลใน list เข้าไปเก็บไว้ใน file'''
+    with open(filename, 'w', encoding='utf-8') as f:
+        for item in employees:
+            line = ','.join(item)
+            f.write(line + '\n')
+    print('💾 บันทึกข้อเรียบร้อย!')
+
