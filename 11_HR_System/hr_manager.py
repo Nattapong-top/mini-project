@@ -106,14 +106,24 @@ def calculate_and_show_slip(employees:list):
             if sso > 750:
                 sso = 750
             
+            # --- จุดเปลี่ยน: ให้ป๋าเลือกโหมด ---
+            print(f'\nกำลังคำนวณภาษีของคุณ {name} (เงินเดือน {salary:,})')
+            print('[1] แบบง่าย (เหมาจ่าย 3-5%)')
+            print('[2] แบบจริงจัง (ขั้นบันได + ลดหย่อน)')
+            mode = input('เลือกวิธีคำนวณ: ').strip()
+
             # 2. ภาษี (Step Tax)
             tax = 0
-            if salary > 50000:
-                tax = salary * 0.05     # 5%
-            elif salary > 20000:
-                tax = salary * 0.03     # 3%
+            if mode == '2':
+                # เรียกใช้ def real world
+                tax = calculate_tax_real_world(salary, sso)
+                print('--> ใช้สูตรสรรพากร (ขันบันได)')
             else:
-                tax = 0 # ฟรี
+                if salary > 50000:
+                    tax = salary * 0.05     # 5%
+                elif salary > 20000:
+                    tax = salary * 0.03     # 3%
+                print('--> ใข้สูตรเหมาจ่ายแบบง่าย')            
             
             # 3. เงินสุุทธิ
             net_salary = salary - sso - tax
@@ -133,3 +143,56 @@ def calculate_and_show_slip(employees:list):
     if not found:
         print('❌ ไม่พบพนักงานรหัสนี้')
 
+def calculate_tax_real_world(salary, sso_monthly):
+    """
+    ฟังก์ชันเสริม: คำนวณภาษีแบบขั้นบันได (ของจริง)
+    คืนค่าเป็น ภาษีที่ต้องจ่ายต่อเดือน
+    """
+    # 1. คิดรายได้ทั้งปี
+    year_salary = salary * 12
+    sso_year = sso_monthly * 12
+
+    # 2. หักค่าใช้จ่าย (50% ไม่เกิน 100,000)
+    expense = year_salary * 0.5
+    if expense > 100000:
+        expense = 100000
+
+    # 3. หักลดหย่อนส่วนตัว (60,000)
+    perssonal = 60000
+
+    # 4. เงินได้สุทธิ (Net Income)
+    net_income = year_salary - expense - perssonal - sso_year
+
+    # 5. คำนวณตามขั้นบันได
+    tax_year = 0
+
+    # ถ้าเงินสุทธิไม่ถึง 150,000 = ฟรีภาษี
+    if net_income <= 150000:
+        return 0
+    
+    # ตัด 150,000 แรกทิ้ง (เพราะฟรี)
+    remain = net_income - 150000
+
+    # ขั้นที่ 1: 150,001 - 300,000 (คิด 5%) -> ช่วงกว้าง 150,000
+    step1 = 150000
+    if remain < 150000:
+        step1 = remain
+    
+    tax_year += step1 * 0.05
+    remain -= step1
+
+    # ขั้นที่ 2: 300,001 - 500,000 (คิด 10%) -> ช่วงกว้าง 200,000
+    if remain > 0:
+        step2 = 200000
+        if remain < 200000:
+            step2 = remain
+
+        tax_year  += step2 * 0.10
+        remain -= step2
+    
+    # ขั้นที่ 3: 500,001 ขึ้นไป (สมมติคิด 15% ยาวๆ)
+    if remain > 0:
+        tax_year += remain * 0.15
+    
+    # หาร 12 เพื่อเป็นยอดจ่ายรายเดือน
+    return tax_year / 12
