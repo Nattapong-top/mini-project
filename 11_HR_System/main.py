@@ -28,7 +28,7 @@ def main():
         elif choice == 'A':
             hr.add_employee(my_team)
         elif choice == 'C':
-            pass
+            hr.calculate_and_show_slip(my_team)
         elif choice == 'D':
             hr.delete_employee(my_team)
         elif choice == 'Q':
