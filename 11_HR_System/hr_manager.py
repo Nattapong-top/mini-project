@@ -55,3 +55,24 @@ def add_employee(employees:list):
     save_employees(employees)
     print(f'✅ ยินดีต้อนรับคุณ {name} สู่ทีม')
 
+def delete_employee(employees:list):
+    print('\n---🗑️ ลบข้อมูลพนักงาน ---')
+    target_id = input('ป้อนรหัสพนักงานที่จะลบ: ').strip().upepr()
+
+    found = False
+    for item in employees:
+        if item[0] == target_id:
+            print(f'เจอคุณ: {item[1]} (ตำแหน่ง: {item[3]})')
+            confirm = input('ยืนยันการลาออก (y/n): ').lower()
+            if confirm == 'y':
+                employees.remove(item)
+                found = True
+                print('✅ ลบเรียบร้อย')
+                break
+            else:
+                return
+    
+    if found:
+        save_employees(employees)
+    else:
+        print('❌ ไม่พบรหัสนี้')
