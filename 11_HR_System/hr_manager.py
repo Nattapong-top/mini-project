@@ -6,3 +6,20 @@
 เกิน 20,000 = หัก 3%
 เกิน 50,000 = หัก 5% (คนรวยจ่ายเยอะหน่อย)
 เงินสุทธิ (Net Salary): เงินเดือน - ประกันสังคม - ภาษี'''
+
+import os
+
+
+script_dir = os.path.dirname(__file__)
+filename = os.path.join(script_dir, 'employees.txt')
+
+def load_employees():
+    '''อ่านข้อมูลพนักงาน: รหัส, ชื่อ, เงินเดือน, ตำแหน่ง'''
+    employees = []
+    if os.path.exists(filename):
+        with open(filename, encoding='utf-8') as f:
+            for line in f:
+                parts = line.strip().split(',')
+                employees.append(parts)
+    return employees
+
