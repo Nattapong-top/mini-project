@@ -57,7 +57,7 @@ def add_employee(employees:list):
 
 def delete_employee(employees:list):
     print('\n---🗑️ ลบข้อมูลพนักงาน ---')
-    target_id = input('ป้อนรหัสพนักงานที่จะลบ: ').strip().upepr()
+    target_id = input('ป้อนรหัสพนักงานที่จะลบ: ').strip().upper()
 
     found = False
     for item in employees:
@@ -76,3 +76,13 @@ def delete_employee(employees:list):
         save_employees(employees)
     else:
         print('❌ ไม่พบรหัสนี้')
+
+def show_all_employees(employees:list):
+    print('\n' + '='*70)
+    print(f"{'ID':<8} {'ชื่อ-สกุล':<25} {'ตำแหน่ง':<15} {'เงินเดือน':10}")
+    print('='*70)
+    for item in employees:
+        salary_fmt = f"{int(item[2]):,}"
+        print(f"{item[0]:<8} {item[1]:<25} {item[3]} {salary_fmt:>10}")
+    print('='*70)
+

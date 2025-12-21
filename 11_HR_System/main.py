@@ -11,10 +11,10 @@ import hr_manager as hr
 
 def main():
     while True:
-        # my_team = hr.load_employees()
+        my_team = hr.load_employees()
 
         print('\n=== 🏢 ระบบ HR เงินเดือน (Salary System) ===')
-        # print(f'พนักงานทั้งหมด: {len(my_team)} คน')
+        print(f'พนักงานทั้งหมด: {len(my_team)} คน')
         print('[S] ดูรายชื่อพนักงานทั้งหมด')
         print('[A] เพิ่มพนักงานใหม่ (Recruit)')
         print('[C] คำนวณ/ออกสลิปเงินเดือน (Slip)')
@@ -24,13 +24,13 @@ def main():
         choice = input('เลือกคำสั่ง: ').strip().upper()
 
         if choice == 'S':
-            pass
+            hr.show_all_employees(my_team)
         elif choice == 'A':
-            pass
+            hr.add_employee(my_team)
         elif choice == 'C':
             pass
         elif choice == 'D':
-            pass
+            hr.delete_employee(my_team)
         elif choice == 'Q':
             print('ปิดระบบ HR... บ๊าย บาย')
             break

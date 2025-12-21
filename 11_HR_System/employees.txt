@@ -1,0 +1,9 @@
+EMP001,สมชาย ใจดี,55000,Manager
+EMP002,วีระ รักชาติ,25000,IT Support
+EMP003,ปิติ มีทรัพย์,45000,Developer
+EMP004,มานี ชูใจ,28000,HR Officer
+EMP005,ชูวิทย์ คิดไว,22000,Sales
+EMP006,แก้วตา น่ารัก,18000,Admin
+EMP007,สมศักดิ์ ภักดี,16000,Driver
+EMP009,วิชัย ไวไฟ,38000,Network Engineer
+EMP010,กานดา หน้าสวย,27000,Marketing
