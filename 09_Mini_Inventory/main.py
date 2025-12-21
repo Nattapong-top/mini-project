@@ -18,7 +18,7 @@ def main():
         elif choice == 'A':
             manager.add_product(my_products)
         elif choice == 'U':
-            pass
+            manager.update_stock(my_products)
         elif choice == 'Q':
             print('ปิดระบบสต๊อก... บ๊าย บาย')
             break
