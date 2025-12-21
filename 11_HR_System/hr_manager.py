@@ -23,11 +23,35 @@ def load_employees():
                 employees.append(parts)
     return employees
 
-def seve_employees(employees:list):
+def save_employees(employees:list):
     '''บันทึกข้อมูลใน list เข้าไปเก็บไว้ใน file'''
     with open(filename, 'w', encoding='utf-8') as f:
         for item in employees:
             line = ','.join(item)
             f.write(line + '\n')
     print('💾 บันทึกข้อเรียบร้อย!')
+
+def add_employee(employees:list):
+    print('\n --- ➕ เพิ่มพนักงานใหม่ ---')
+    emp_id = input('รหัสพนักงาน (EMP01): ').strip().upper()
+
+    for item in employees:
+        if item[0] == emp_id:
+            print('❌ รหัสนี้มีอยู่แล้ว')
+            return
+
+    name = input('ชื่อ-นามสกุล: ').strip()
+
+    while True:
+        sarary_str = input('เงินเดือน (บาท): ').strip()
+        if sarary_str.isdigit():
+            break
+        print('❌ ใส่ตัวเลขเท่านั้นครับ!')
+    
+    position = input('ตำแหน่งงาน: ').strip()
+
+    # เก็บ List (salary เก็บเป็น str ไปก่อนเพือนให้ save ง่าย)
+    employees.append([emp_id, name, sarary_str, position])
+    save_employees(employees)
+    print(f'✅ ยินดีต้อนรับคุณ {name} สู่ทีม')
 
