@@ -8,6 +8,7 @@ def main():
         print('\n=== สมุดโทรศัพท์ป๋า (Contract Book) ===')
         print(f'มีเพื่อนทั้งหมด: {len(my_contracts)} คน')
         print('[S] แสดงรายชื่อทั้งหมด')
+        print('[F] ค้นหารายชื่อ')
         print('[A] เพิ่มรายชื่อใหม่')
         print('[U] แก้ไขรายชื่อ')
         print('[D] ลบรายชื่อ')
@@ -17,6 +18,8 @@ def main():
 
         if choice == 'S':
             manager.show_all_contracts(my_contracts)
+        elif choice == "F":
+            manager.search_contract(my_contracts)
         elif choice == 'A':
             manager.add_contract(my_contracts)
         elif choice == 'U':
