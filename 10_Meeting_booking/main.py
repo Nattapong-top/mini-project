@@ -3,7 +3,7 @@ import booking_lib as lib
 def main():
     while True:
         my_bookings = lib.load_booking()
-        print('\n')
+        print('\n=== 📅 ระบบจองห้องประชุม (Room Booking) ===')
         print('[S] ดูตารางห้องทั้งหมด')
         print('[B] จองห้อง (Book)')
         print('[Q] ออกจากโปรแกรม')
@@ -13,8 +13,8 @@ def main():
         if choice == 'S':
             lib.show_schedule(my_bookings)
         elif choice == 'B':
-            pass
-        elif choice == 'C':
+            lib.book_room(my_bookings)
+        elif choice == 'Q':
             print('ออกจากโปรแกรม... บ๊าย บาย')
             break
         else:
