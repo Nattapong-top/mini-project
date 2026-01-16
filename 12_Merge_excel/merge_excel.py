@@ -114,7 +114,7 @@ class ExcelMergerApp(ctk.CTk):
         self.btn_clear = ctk.CTkButton(self.btn_frame, text="Clear", fg_color="transparent", border_width=2, text_color=("gray10", "#DCE4EE"), command=self.clear_action)
         self.btn_clear.pack(pady=(0, 20), fill="x")
 
-        self.btn_merge = ctk.CTkButton(self.btn_frame, text="MERGE", height=60, fg_color="#2CC985", hover_color="#229965", font=ctk.CTkFont(size=16, weight="bold"), command=self.merge_action)
+        self.btn_merge = ctk.CTkButton(self.btn_frame, text="MERGE", height=60, fg_color="#2CC985", hover_color="#FF0000", font=ctk.CTkFont(size=16, weight="bold"), command=self.merge_action)
         self.btn_merge.pack(side="bottom", fill="x", pady=(10, 0))
 
         # --- เพิ่มปุ่ม Open Folder ---
