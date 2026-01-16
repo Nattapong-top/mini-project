@@ -4,6 +4,7 @@ import pandas as pd
 import os
 import platform
 import subprocess
+import threading
 
 # ตั้งค่าธีม
 ctk.set_appearance_mode("System")
@@ -171,32 +172,73 @@ class ExcelMergerApp(ctk.CTk):
             messagebox.showwarning("Warning", t["msg_no_file"])
             return
 
+        # เลือกที่เซฟไฟล์ (ต้องทำใน Main Thread ก่อน)
         save_path = filedialog.asksaveasfilename(defaultextension=".xlsx", filetypes=[("Excel Files", "*.xlsx")], initialfile="Merged_Output.xlsx")
         if not save_path: return
 
-        self.status_label.configure(text="Processing...")
-        self.update()
+        self.btn_merge.configure(state="disabled", text="Processing...")
+        self.status_label.configure(text="Processing... (Please wait, heavy task running)")
 
-        try:
-            data_frames = []
-            for file in self.all_file_paths:
-                df = pd.read_excel(file)
-                data_frames.append(df)
+
+        def merge_action(self):
+            t = self.texts[self.lang_code]
+            if not self.all_file_paths:
+                messagebox.showwarning("Warning", t["msg_no_file"])
+                return
+
+            # เลือกที่เซฟไฟล์ (ต้องทำใน Main Thread ก่อน)
+            save_path = filedialog.asksaveasfilename(defaultextension=".xlsx",
+                                                    filetypes=[("Excel Files", "*.xlsx")],
+                                                    initialfile="Merged_Output.xlsx")
+            if not save_path: return
+
+            # --- เริ่มกระบวนการแยก Thread (จ้างพ่อครัว) ---
             
-            result = pd.concat(data_frames, ignore_index=True)
-            result.to_excel(save_path, index=False)
+            # 1. ล็อคปุ่มไม่ให้กดซ้ำระหว่างทำ
+            self.btn_merge.configure(state="disabled", text="Processing...")
+            self.status_label.configure(text="Processing... (Please wait, heavy task running)")
             
-            # --- จำ Path และเปิดใช้งานปุ่ม ---
+        # 2. สร้างฟังก์ชันงานหนัก (ที่จะให้พ่อครัวทำ)
+        def run_heavy_task():
+            try:
+                data_frames = []
+                for file in self.all_file_paths:
+                    # อ่านไฟล์ (งานหนัก)
+                    df = pd.read_excel(file)
+                    data_frames.append(df)
+                
+                # รวมร่าง (งานหนักมาก)
+                result = pd.concat(data_frames, ignore_index=True)
+                result.to_excel(save_path, index=False)
+                
+                # เสร็จแล้ว! กลับมาบอก Main Thread
+                self.after(0, lambda: self.finish_merge(save_path, True, None))
+                
+            except Exception as e:
+                # ถ้าพัง ให้กลับมาฟ้อง
+                self.after(0, lambda: self.finish_merge(save_path, False, str(e)))
+
+        # 3. สั่งพ่อครัวเริ่มงานทันที! (โดยไม่กวนหน้าร้าน)
+        threading.Thread(target=run_heavy_task).start()
+
+    def finish_merge(self, save_path, success, error_msg):
+        """ฟังก์ชันจบงาน (เรียกเมื่อพ่อครัวทำเสร็จ)"""
+        t = self.texts[self.lang_code]
+        
+        # คืนชีพปุ่ม
+        self.btn_merge.configure(state="normal", text=t["merge"])
+        
+        if success:
+            # จำ Path และเปิดใช้งานปุ่ม
             self.last_save_path = save_path
-            self.btn_open_folder.configure(state="normal") # ปลดล็อคปุ่ม
+            self.btn_open_folder.configure(state="normal")
             
             self.status_label.configure(text=f"{t['status_done']} {os.path.basename(save_path)}")
             messagebox.showinfo(t["msg_success"], f"{t['msg_success']}\nSaved to: {save_path}")
+        else:
+            self.status_label.configure(text=f"{t['status_error']} {error_msg}")
+            messagebox.showerror("Error", error_msg)
             
-        except Exception as e:
-            self.status_label.configure(text=f"{t['status_error']} {str(e)}")
-            messagebox.showerror("Error", f"{str(e)}")
-
     def open_folder_action(self):
         """Logic: เปิดโฟลเดอร์ที่เก็บไฟล์"""
         if self.last_save_path and os.path.exists(self.last_save_path):
@@ -230,6 +272,8 @@ class ExcelMergerApp(ctk.CTk):
         
         if "Error" not in self.status_label.cget("text") and "Saved" not in self.status_label.cget("text"):
              self.status_label.configure(text=t["status_ready"])
+
+
 
 if __name__ == "__main__":
     app = ExcelMergerApp()
