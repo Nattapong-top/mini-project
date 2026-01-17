@@ -134,6 +134,12 @@ class PDFWatermarkApp(ctk.CTk):
                 return self.font_map["TH"]
         return self.font_map["EN"]
 
+    def ensure_font(self, page, fontname, fontfile):
+        if fontname not in page.get_fonts():
+            page.insert_font(fontname=fontname, fontfile=fontfile)
+
+   
+
     # ---------- Watermark Engine ----------
     def apply_watermark(self, page):
         text = self.textbox.get("1.0", "end-1c").strip()
@@ -144,24 +150,37 @@ class PDFWatermarkApp(ctk.CTk):
         if not os.path.exists(font_path):
             return
 
+        # ตั้งชื่อฟอนต์ตามภาษา (สำคัญ)
+        if font_path.endswith("Sarabun-Regular.ttf"):
+            fontname = "TH_FONT"
+        elif font_path.endswith("NotoSansSC-Regular.ttf"):
+            fontname = "CN_FONT"
+        else:
+            fontname = "EN_FONT"
+
+        # ✅ register ฟอนต์ก่อน (หัวใจของปัญหานี้)
+        self.ensure_font(page, fontname, font_path)
+
         rect = page.rect
+        text_rect = fitz.Rect(
+            rect.width * 0.05,
+            rect.height * 0.25,
+            rect.width * 0.95,
+            rect.height * 0.75
+        )
 
-        # ----- Position: Shift Left 25% -----
-        x = rect.width * 0.25
-        y = rect.height * 0.5
-        pos = fitz.Point(x, y)
-
-        matrix = fitz.Matrix(1, 1).prerotate(self.rotate_var.get())
-
-        page.insert_text(
-            pos,
+        page.insert_textbox(
+            text_rect,
             text,
             fontsize=self.font_size_var.get(),
-            fontfile=font_path,
+            fontname=fontname,     # << ใช้ชื่อที่ register แล้ว
             color=(0.5, 0.5, 0.5),
             fill_opacity=self.opacity.get(),
-            morph=(pos, matrix),
+            align=fitz.TEXT_ALIGN_CENTER,
+            rotate=0
         )
+
+
 
     # ---------- Preview ----------
     def update_preview(self):
