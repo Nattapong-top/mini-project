@@ -23,7 +23,7 @@ class ExcelMergerApp(ctk.CTk):
         # --- 2. ข้อมูลภาษา ---
         self.texts = {
             "en": {
-                "title": "Excel Merger Tool",
+                "title": "Merge Tool (Excel/CSV)", # เปลี่ยนชื่อนิดนึง
                 "add_file": "Add Files",
                 "add_folder": "Add Folder",
                 "clear": "Clear List",
@@ -37,7 +37,7 @@ class ExcelMergerApp(ctk.CTk):
                 "lang_label": "Language:"
             },
             "th": {
-                "title": "โปรแกรมรวมไฟล์ Excel",
+                "title": "โปรแกรมรวมไฟล์ (Excel/CSV)", # เปลี่ยนชื่อนิดนึง
                 "add_file": "เพิ่มไฟล์",
                 "add_folder": "เพิ่มโฟลเดอร์",
                 "clear": "ล้างรายการ",
@@ -51,7 +51,7 @@ class ExcelMergerApp(ctk.CTk):
                 "lang_label": "ภาษา:"
             },
             "cn": {
-                "title": "Excel 合并工具",
+                "title": "文件合并工具 (Excel/CSV)", # เปลี่ยนชื่อนิดนึง
                 "add_file": "添加文件",
                 "add_folder": "添加文件夹",
                 "clear": "清空列表",
@@ -67,7 +67,7 @@ class ExcelMergerApp(ctk.CTk):
         }
 
         # --- 3. สร้างหน้าตา ---
-        self.title("Excel Merger Pro - By Paa Top IT")
+        self.title("Excel & CSV Merger Pro - By Paa Top IT")
         self.geometry("750x600")
         
         self.grid_rowconfigure(0, weight=0)
@@ -82,7 +82,7 @@ class ExcelMergerApp(ctk.CTk):
         self.header_frame = ctk.CTkFrame(self, corner_radius=0)
         self.header_frame.grid(row=0, column=0, sticky="ew")
         
-        self.logo_label = ctk.CTkLabel(self.header_frame, text="Excel Merger", font=ctk.CTkFont(size=20, weight="bold"))
+        self.logo_label = ctk.CTkLabel(self.header_frame, text="Merger Pro", font=ctk.CTkFont(size=20, weight="bold"))
         self.logo_label.pack(side="left", padx=20, pady=15)
 
         self.lang_option = ctk.CTkOptionMenu(self.header_frame, values=["English", "ไทย", "中文"], command=self.change_language_event, width=100)
@@ -116,16 +116,13 @@ class ExcelMergerApp(ctk.CTk):
         self.btn_clear = ctk.CTkButton(self.btn_frame, text="Clear", fg_color="transparent", border_width=2, text_color=("gray10", "#DCE4EE"), command=self.clear_action)
         self.btn_clear.pack(pady=(0, 20), fill="x")
 
-        # ปุ่ม MERGE (สีแดงแรงฤทธิ์ ตามที่ป๋าปรับไว้)
         self.btn_merge = ctk.CTkButton(self.btn_frame, text="MERGE", height=60, fg_color="#2CC985", hover_color="#FF0000", font=ctk.CTkFont(size=16, weight="bold"), command=self.merge_action)
         self.btn_merge.pack(side="bottom", fill="x", pady=(10, 0))
 
-        # ปุ่ม Open Folder
         self.btn_open_folder = ctk.CTkButton(self.btn_frame, text="Open Folder", fg_color="#3B8ED0", command=self.open_folder_action)
         self.btn_open_folder.pack(side="bottom", fill="x", pady=(0, 10)) 
         self.btn_open_folder.configure(state="disabled")
 
-        # Status Label
         self.status_label = ctk.CTkLabel(self, text="Ready...", anchor="w", text_color="gray")
         self.status_label.grid(row=2, column=0, sticky="ew", padx=20, pady=(0, 10))
 
@@ -142,7 +139,8 @@ class ExcelMergerApp(ctk.CTk):
         self.file_list_display.configure(state="disabled")
 
     def add_files_action(self):
-        files = filedialog.askopenfilenames(filetypes=[("Excel Files", "*.xlsx *.xls")])
+        # เพิ่ม *.csv เข้าไปในประเภทไฟล์
+        files = filedialog.askopenfilenames(filetypes=[("Excel & CSV", "*.xlsx *.xls *.csv")])
         if files:
             for f in files:
                 if f not in self.all_file_paths:
@@ -154,7 +152,8 @@ class ExcelMergerApp(ctk.CTk):
         if folder:
             for root, dirs, files in os.walk(folder):
                 for file in files:
-                    if file.lower().endswith((".xlsx", ".xls")) and not file.startswith("~$"):
+                    # เพิ่ม .csv เข้าไปในการสแกน
+                    if file.lower().endswith((".xlsx", ".xls", ".csv")) and not file.startswith("~$"):
                         full_path = os.path.join(root, file)
                         if full_path not in self.all_file_paths:
                             self.all_file_paths.append(full_path)
@@ -178,49 +177,58 @@ class ExcelMergerApp(ctk.CTk):
                                                 initialfile="Merged_Output.xlsx")
         if not save_path: return
 
-        # 1. ล็อคปุ่ม
         self.btn_merge.configure(state="disabled", text="Processing...")
         self.status_label.configure(text="Processing... (Please wait, heavy task running)")
         
-        # 2. สร้างฟังก์ชันงานหนัก (Worker)
         def run_heavy_task():
             try:
                 data_frames = []
                 for file in self.all_file_paths:
-                    # อ่านทุก Sheet
-                    all_sheets = pd.read_excel(file, sheet_name=None)
-                    for sheet_name, df in all_sheets.items():
-                        
-                        # สร้างคอลัมน์ระบุที่มา
+                    
+                    # --- แยกทางเดินรถ: ถ้าเป็น CSV ให้ใช้อีกสูตร ---
+                    if file.lower().endswith(".csv"):
+                        try:
+                            # สูตร 1: ลองอ่านแบบมาตรฐาน (UTF-8)
+                            df = pd.read_csv(file)
+                        except UnicodeDecodeError:
+                            # สูตร 2: ถ้าอ่านไม่ออก (ต่างดาว) ให้ลองใช้รหัสภาษาไทย (CP874)
+                            try:
+                                df = pd.read_csv(file, encoding='cp874')
+                            except:
+                                # สูตร 3: ถ้ายังไม่ได้ ลอง ISO-8859-1 (ครอบจักรวาล)
+                                df = pd.read_csv(file, encoding='iso-8859-1')
+
+                        # CSV ไม่มี Sheet Name เลยตั้งชื่อเองว่า "CSV_Data"
                         df['Origin_File'] = os.path.basename(file)
-                        df['Origin_Sheet'] = sheet_name # แก้คำผิดให้แล้วครับ
+                        df['Origin_Sheet'] = "CSV_Data"
+                        data_frames.append(df)
                         
-                        # --- บรรทัดนี้สำคัญมาก! ห้ามลืม! ---
-                        data_frames.append(df) 
+                    else:
+                        # --- ถ้าเป็น Excel (ทำเหมือนเดิม) ---
+                        all_sheets = pd.read_excel(file, sheet_name=None)
+                        for sheet_name, df in all_sheets.items():
+                            df['Origin_File'] = os.path.basename(file)
+                            df['Origin_Sheet'] = sheet_name
+                            data_frames.append(df) 
                 
-                # รวมร่าง
                 if data_frames:
                     result = pd.concat(data_frames, ignore_index=True)
 
-                    # CLEANUP 1
                     del data_frames
                     gc.collect()
 
-                    # บันทึกไฟล์
                     result.to_excel(save_path, index=False)
 
-                    # CLEANUP 2
                     del result
                     gc.collect()
 
                     self.after(0, lambda: self.finish_merge(save_path, True, None))
                 else:
-                    self.after(0, lambda: self.finish_merge(save_path, False, "No data found in files!"))
+                    self.after(0, lambda: self.finish_merge(save_path, False, "No data found!"))
 
             except Exception as e:
                 self.after(0, lambda: self.finish_merge(save_path, False, str(e)))
 
-        # 3. สั่งเริ่มงาน
         threading.Thread(target=run_heavy_task).start()
 
     def finish_merge(self, save_path, success, error_msg):
