@@ -1,0 +1,28 @@
+1️⃣ Problem Solving Mindset (หัวใจที่สุด)
+Input: 
+
+Output: 
+
+Logic: 
+
+Edge Case: เคสแปลก ๆ มีไหม
+
+
+2️⃣ Algorithm Thinking (คิดเป็นขั้นตอนแบบละเอียด)
+
+
+รับเข้า (Input):
+
+ประมวลผล (Process) :
+
+ส่งออก (Output):
+
+
+3️⃣ Control Flow (โครงสร้างการไหล)
+
+
+4️⃣ Abstraction & Function (คิดเป็นชั้น)
+
+
+5️⃣ Data Thinking (มองข้อมูลให้ขาด)
+
