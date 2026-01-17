@@ -5,6 +5,7 @@ import os
 import platform
 import subprocess
 import threading
+import gc
 
 # ตั้งค่าธีม
 ctk.set_appearance_mode("System")
@@ -16,10 +17,10 @@ class ExcelMergerApp(ctk.CTk):
 
         # --- 1. ตั้งค่าตัวแปร ---
         self.all_file_paths = []
-        self.last_save_path = "" # เพิ่มตัวแปรจำที่อยู่ไฟล์ล่าสุด
+        self.last_save_path = "" 
         self.lang_code = "en"
 
-        # --- 2. ข้อมูลภาษา (เพิ่มคำศัพท์ปุ่มเปิดโฟลเดอร์) ---
+        # --- 2. ข้อมูลภาษา ---
         self.texts = {
             "en": {
                 "title": "Excel Merger Tool",
@@ -27,7 +28,7 @@ class ExcelMergerApp(ctk.CTk):
                 "add_folder": "Add Folder",
                 "clear": "Clear List",
                 "merge": "MERGE FILES",
-                "open_dir": "Open Folder", # <--- เพิ่ม
+                "open_dir": "Open Folder",
                 "status_ready": "Ready...",
                 "status_done": "Done! Saved at:",
                 "status_error": "Error: ",
@@ -41,7 +42,7 @@ class ExcelMergerApp(ctk.CTk):
                 "add_folder": "เพิ่มโฟลเดอร์",
                 "clear": "ล้างรายการ",
                 "merge": "เริ่มรวมไฟล์",
-                "open_dir": "เปิดโฟลเดอร์เก็บไฟล์", # <--- เพิ่ม
+                "open_dir": "เปิดโฟลเดอร์เก็บไฟล์",
                 "status_ready": "พร้อมทำงาน...",
                 "status_done": "เรียบร้อย! บันทึกที่:",
                 "status_error": "เกิดข้อผิดพลาด: ",
@@ -55,7 +56,7 @@ class ExcelMergerApp(ctk.CTk):
                 "add_folder": "添加文件夹",
                 "clear": "清空列表",
                 "merge": "立即合并",
-                "open_dir": "打开文件夹", # <--- เพิ่ม
+                "open_dir": "打开文件夹",
                 "status_ready": "准备就绪...",
                 "status_done": "合并完成！保存于：",
                 "status_error": "错误：",
@@ -67,7 +68,7 @@ class ExcelMergerApp(ctk.CTk):
 
         # --- 3. สร้างหน้าตา ---
         self.title("Excel Merger Pro - By Paa Top IT")
-        self.geometry("750x600") # ขยายความสูงนิดหน่อยเผื่อปุ่มใหม่
+        self.geometry("750x600")
         
         self.grid_rowconfigure(0, weight=0)
         self.grid_rowconfigure(1, weight=1)
@@ -115,14 +116,14 @@ class ExcelMergerApp(ctk.CTk):
         self.btn_clear = ctk.CTkButton(self.btn_frame, text="Clear", fg_color="transparent", border_width=2, text_color=("gray10", "#DCE4EE"), command=self.clear_action)
         self.btn_clear.pack(pady=(0, 20), fill="x")
 
+        # ปุ่ม MERGE (สีแดงแรงฤทธิ์ ตามที่ป๋าปรับไว้)
         self.btn_merge = ctk.CTkButton(self.btn_frame, text="MERGE", height=60, fg_color="#2CC985", hover_color="#FF0000", font=ctk.CTkFont(size=16, weight="bold"), command=self.merge_action)
         self.btn_merge.pack(side="bottom", fill="x", pady=(10, 0))
 
-        # --- เพิ่มปุ่ม Open Folder ---
-        # วางไว้เหนือปุ่ม Merge หรือ ใต้ปุ่ม Merge ก็ได้ (อันนี้วางไว้ข้างบน Merge นิดนึง)
+        # ปุ่ม Open Folder
         self.btn_open_folder = ctk.CTkButton(self.btn_frame, text="Open Folder", fg_color="#3B8ED0", command=self.open_folder_action)
         self.btn_open_folder.pack(side="bottom", fill="x", pady=(0, 10)) 
-        self.btn_open_folder.configure(state="disabled") # เริ่มต้นห้ามกด จนกว่าจะรวมเสร็จ
+        self.btn_open_folder.configure(state="disabled")
 
         # Status Label
         self.status_label = ctk.CTkLabel(self, text="Ready...", anchor="w", text_color="gray")
@@ -153,7 +154,7 @@ class ExcelMergerApp(ctk.CTk):
         if folder:
             for root, dirs, files in os.walk(folder):
                 for file in files:
-                    if file.endswith((".xlsx", ".xls")) and not file.startswith("~$"):
+                    if file.lower().endswith((".xlsx", ".xls")) and not file.startswith("~$"):
                         full_path = os.path.join(root, file)
                         if full_path not in self.all_file_paths:
                             self.all_file_paths.append(full_path)
@@ -161,8 +162,8 @@ class ExcelMergerApp(ctk.CTk):
 
     def clear_action(self):
         self.all_file_paths = []
-        self.last_save_path = "" # ล้าง path เก่าด้วย
-        self.btn_open_folder.configure(state="disabled") # ปิดปุ่มเปิดโฟลเดอร์
+        self.last_save_path = ""
+        self.btn_open_folder.configure(state="disabled")
         self.update_file_list_ui()
         self.status_label.configure(text=self.texts[self.lang_code]["status_ready"])
 
@@ -172,67 +173,63 @@ class ExcelMergerApp(ctk.CTk):
             messagebox.showwarning("Warning", t["msg_no_file"])
             return
 
-        # เลือกที่เซฟไฟล์ (ต้องทำใน Main Thread ก่อน)
-        save_path = filedialog.asksaveasfilename(defaultextension=".xlsx", filetypes=[("Excel Files", "*.xlsx")], initialfile="Merged_Output.xlsx")
+        save_path = filedialog.asksaveasfilename(defaultextension=".xlsx",
+                                                filetypes=[("Excel Files", "*.xlsx")],
+                                                initialfile="Merged_Output.xlsx")
         if not save_path: return
 
+        # 1. ล็อคปุ่ม
         self.btn_merge.configure(state="disabled", text="Processing...")
         self.status_label.configure(text="Processing... (Please wait, heavy task running)")
-
-
-        def merge_action(self):
-            t = self.texts[self.lang_code]
-            if not self.all_file_paths:
-                messagebox.showwarning("Warning", t["msg_no_file"])
-                return
-
-            # เลือกที่เซฟไฟล์ (ต้องทำใน Main Thread ก่อน)
-            save_path = filedialog.asksaveasfilename(defaultextension=".xlsx",
-                                                    filetypes=[("Excel Files", "*.xlsx")],
-                                                    initialfile="Merged_Output.xlsx")
-            if not save_path: return
-
-            # --- เริ่มกระบวนการแยก Thread (จ้างพ่อครัว) ---
-            
-            # 1. ล็อคปุ่มไม่ให้กดซ้ำระหว่างทำ
-            self.btn_merge.configure(state="disabled", text="Processing...")
-            self.status_label.configure(text="Processing... (Please wait, heavy task running)")
-            
-        # 2. สร้างฟังก์ชันงานหนัก (ที่จะให้พ่อครัวทำ)
+        
+        # 2. สร้างฟังก์ชันงานหนัก (Worker)
         def run_heavy_task():
             try:
                 data_frames = []
                 for file in self.all_file_paths:
-                    # อ่านไฟล์ (งานหนัก)
-                    df = pd.read_excel(file)
-                    data_frames.append(df)
+                    # อ่านทุก Sheet
+                    all_sheets = pd.read_excel(file, sheet_name=None)
+                    for sheet_name, df in all_sheets.items():
+                        
+                        # สร้างคอลัมน์ระบุที่มา
+                        df['Origin_File'] = os.path.basename(file)
+                        df['Origin_Sheet'] = sheet_name # แก้คำผิดให้แล้วครับ
+                        
+                        # --- บรรทัดนี้สำคัญมาก! ห้ามลืม! ---
+                        data_frames.append(df) 
                 
-                # รวมร่าง (งานหนักมาก)
-                result = pd.concat(data_frames, ignore_index=True)
-                result.to_excel(save_path, index=False)
-                
-                # เสร็จแล้ว! กลับมาบอก Main Thread
-                self.after(0, lambda: self.finish_merge(save_path, True, None))
-                
+                # รวมร่าง
+                if data_frames:
+                    result = pd.concat(data_frames, ignore_index=True)
+
+                    # CLEANUP 1
+                    del data_frames
+                    gc.collect()
+
+                    # บันทึกไฟล์
+                    result.to_excel(save_path, index=False)
+
+                    # CLEANUP 2
+                    del result
+                    gc.collect()
+
+                    self.after(0, lambda: self.finish_merge(save_path, True, None))
+                else:
+                    self.after(0, lambda: self.finish_merge(save_path, False, "No data found in files!"))
+
             except Exception as e:
-                # ถ้าพัง ให้กลับมาฟ้อง
                 self.after(0, lambda: self.finish_merge(save_path, False, str(e)))
 
-        # 3. สั่งพ่อครัวเริ่มงานทันที! (โดยไม่กวนหน้าร้าน)
+        # 3. สั่งเริ่มงาน
         threading.Thread(target=run_heavy_task).start()
 
     def finish_merge(self, save_path, success, error_msg):
-        """ฟังก์ชันจบงาน (เรียกเมื่อพ่อครัวทำเสร็จ)"""
         t = self.texts[self.lang_code]
-        
-        # คืนชีพปุ่ม
         self.btn_merge.configure(state="normal", text=t["merge"])
         
         if success:
-            # จำ Path และเปิดใช้งานปุ่ม
             self.last_save_path = save_path
             self.btn_open_folder.configure(state="normal")
-            
             self.status_label.configure(text=f"{t['status_done']} {os.path.basename(save_path)}")
             messagebox.showinfo(t["msg_success"], f"{t['msg_success']}\nSaved to: {save_path}")
         else:
@@ -240,16 +237,13 @@ class ExcelMergerApp(ctk.CTk):
             messagebox.showerror("Error", error_msg)
             
     def open_folder_action(self):
-        """Logic: เปิดโฟลเดอร์ที่เก็บไฟล์"""
         if self.last_save_path and os.path.exists(self.last_save_path):
-            folder_path = os.path.dirname(self.last_save_path) # เอาแค่ชื่อโฟลเดอร์ ตัดชื่อไฟล์ออก
-            
-            # คำสั่งเปิดโฟลเดอร์ตาม OS (Windows/Mac/Linux)
+            folder_path = os.path.dirname(self.last_save_path)
             if platform.system() == "Windows":
                 os.startfile(folder_path)
-            elif platform.system() == "Darwin":  # Mac
+            elif platform.system() == "Darwin":
                 subprocess.Popen(["open", folder_path])
-            else:  # Linux
+            else:
                 subprocess.Popen(["xdg-open", folder_path])
         else:
             print("Path not found!")
@@ -268,12 +262,10 @@ class ExcelMergerApp(ctk.CTk):
         self.btn_add_folder.configure(text=t["add_folder"])
         self.btn_clear.configure(text=t["clear"])
         self.btn_merge.configure(text=t["merge"])
-        self.btn_open_folder.configure(text=t["open_dir"]) # อัปเดตภาษาปุ่มใหม่
+        self.btn_open_folder.configure(text=t["open_dir"])
         
         if "Error" not in self.status_label.cget("text") and "Saved" not in self.status_label.cget("text"):
              self.status_label.configure(text=t["status_ready"])
-
-
 
 if __name__ == "__main__":
     app = ExcelMergerApp()
