@@ -6,6 +6,8 @@ import platform
 import subprocess
 import threading
 import gc
+import xlrd      # ตัวอ่าน .xls (รุ่นเก่า)
+import openpyxl  # ตัวอ่าน .xlsx (รุ่นใหม่)
 
 # ตั้งค่าธีม
 ctk.set_appearance_mode("System")
