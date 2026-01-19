@@ -227,7 +227,9 @@ class ExcelMergerApp(ctk.CTk):
                     self.after(0, lambda: self.finish_merge(save_path, False, "No data found!"))
 
             except Exception as e:
-                self.after(0, lambda: self.finish_merge(save_path, False, str(e)))
+                # --- จุดที่แก้ครับ ---
+                err_msg = str(e) # เก็บค่า Error ไว้ก่อน
+                self.after(0, lambda: self.finish_merge(save_path, False, err_msg))
 
         threading.Thread(target=run_heavy_task).start()
 
