@@ -5,13 +5,36 @@ class OverLimitError(Exception):
     '''Exception สำหรับกรณีจออดรถเกินเวลาที่กำหนด'''
     pass
 
+class ParkingFullError(Exception):
+    '''Exception เมื่อที่จอดรถเต็ม'''
+    pass
+
 class ParkingLot:
-    def __init__(self):
+    def __init__(self, capacity=10):
+        self.capacity = capacity
+        self.parked_vehicles = []
         self.hourly_rate = 20
         self.hour_limit = 24
         self.max_daily_fee = 200
         self.lost_ticket_penalty = 100
     
+    def get_available_slots(self):
+        '''คืนค่าจำนวนที่วางที่เหลืออยู่'''
+        return self.capacity - len(self.parked_vehicles)
+    
+    def check_in(self, license_plate):
+        '''รับรถเข้าจอด'''
+        # กฎเหล็ก ถ้าที่ว่างไม่เหลือแล้ว (เป็น 0 หรือน้อยกว่า) ให้แจ้ง
+        if self.get_available_slots() <= 0:
+            raise  ParkingFullError('ที่จอดรถเต็มแล้ว')
+        
+        # ถ้ามีที่ว่าง ก็เพิ่มเข้าไปใน list
+        self.parked_vehicles.append(license_plate)
+        return True
+
+    # def test_
+
+
     def validate_duration(self, hours):
         if hours > self.hour_limit:
             raise OverLimitError('จอดเกิน 24 ชั่งโมง ต้องติดต่อพนักงาน')

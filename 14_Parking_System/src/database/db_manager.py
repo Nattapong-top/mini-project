@@ -2,7 +2,7 @@ import sqlite3
 import os
 
 class DBManager:
-    def __init__(self, db_path='data/parking_system.db'):
+    def __init__(self, db_path='/14_Parking_System/data/parking_system.db'):
         # ตรวจสอบว่าโฟลเดอร์ data มีอยู่หรือไม่ ถ้าไม่มีก็สร้างขึ้นมา
         os.makedirs(os.path.dirname(db_path), exist_ok=True)
         # เชื่อมต่อกับฐานข้อมูล SQLite
