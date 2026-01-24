@@ -1,27 +1,44 @@
 import math
 from datetime import datetime
 
+class OverLimitError(Exception):
+    '''Exception สำหรับกรณีจออดรถเกินเวลาที่กำหนด'''
+    pass
+
 class ParkingLot:
     def __init__(self):
         self.hourly_rate = 20
+        self.hour_limit = 24
         self.max_daily_fee = 200
         self.lost_ticket_penalty = 100
+    
+    def validate_duration(self, hours):
+        if hours > self.hour_limit:
+            raise OverLimitError('จอดเกิน 24 ชั่งโมง ต้องติดต่อพนักงาน')
 
-    def calculate_fee(self, entry_time_str, is_lost=False):
+    def calculate_fee(self, entry_time_str, exit_time_str=None, is_lost=False):
         # แปลงข้อความเวลาเป็น Object ของ Python
         entry_time = datetime.strptime(entry_time_str, '%Y-%m-%d %H:%M:%S')
-        now = datetime.now()
-        duration = now - entry_time
+
+        if exit_time_str:
+            exit_time = datetime.strptime(exit_time_str, '%Y-%m-%d %H:%M:%S')
+        else:
+            exit_time = datetime.now()
+
+        duration = exit_time - entry_time
         
         # ปัดเศษชั่วโมงขึ้น
         total_seconds = duration.total_seconds()
         hours = math.ceil(total_seconds / 3600)
 
-        # 1. ลอจิกปกติ: 2 ชม. แรกฟรี
+        # ถ้าจอดนานเกิน 24 ชั่วโมง ติดต่อพนักงาน
+        self.validate_duration(hours)
+
         actual_fee = 0
+        # 1. ลอจิกปกติ: 2 ชม. แรกฟรี
         if hours > 2:
             actual_fee = (hours - 2) * self.hourly_rate
-            
+        
         # 2. ลอจิกเพดานราคา: ไม่เกิน 200
         if actual_fee > self.max_daily_fee:
             actual_fee = self.max_daily_fee
