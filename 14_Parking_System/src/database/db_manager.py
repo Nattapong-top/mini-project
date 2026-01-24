@@ -38,6 +38,31 @@ class DBManager:
                 FOREIGN KEY (vehicle_id) REFERENCES vehicles(vehicle_id)
             )
         ''')
+    def add_record(self, license_plate, id_card, owner_name):
+        """ฟังก์ชันจดบันทึกข้อมูลรถเข้าลงฐานข้อมูล"""
+
+        # 1. บันทึกข้อมูลรถ (ถ้าทะเบียนซ้ำ ให้ขยับไปอัปเดตชื่อและเลขบัตรแทน)
+        self.cursor.execute(
+            """
+            INSERT INTO vehicles (license_plate, id_card, owner_name) 
+            VALUES (?, ?, ?)
+            ON CONFLICT(license_plate) DO UPDATE SET
+                id_card = excluded.id_card,
+                owner_name = excluded.owner_name
+            """,
+            (license_plate, id_card, owner_name)
+        )
+
+        # 2. ดึงรหัสรถ (vehicle_id) มาเพื่อใช้เชื่อมโยงข้อมูล
+        self.cursor.execute("SELECT vehicle_id FROM Vehicles WHERE license_plate = ?", (license_plate,))
+        vehicle_id = self.cursor.fetchone()[0]
+
+        # 3. บันทึกประวัติการจอดใหม่ลงตาราง ParkingRecords (เวลาเข้าจะบันทึกอัตโนมัติ)
+        self.cursor.execute(
+            "INSERT INTO ParkingRecords (vehicle_id, status) VALUES (?, 'IN')",
+            (vehicle_id,)
+        )
+
         self.conn.commit()
     
     def close(self):
