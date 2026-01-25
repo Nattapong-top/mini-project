@@ -29,11 +29,22 @@ class ParkingLot:
         if self.get_available_slots() <= 0:
             raise  ParkingFullError('ที่จอดรถเต็มแล้ว')
         
-        # ถ้ามีที่ว่าง ก็เพิ่มเข้าไปใน list
-        self.parked_vehicles.append(license_plate)
-        self.open_barrier() # เปิดไม้กั้นขึ้น
-        return True
+        # กรณีรถไม่มีทะเบียน ให้สร้าง ID พิเศษขึ้นมาแทน
+        actual_plate = license_plate
+        if not license_plate or license_plate.strip() == '':
+            actual_plate = self._generate_temp_id() # คอลสร้าง id ชั่วคราว
+            print(f'>>> [SYSTEM] รถไม่มีทะเบียน! ออกรหัสชั่วคราว')
+        
 
+        # ถ้ามีที่ว่าง ก็เพิ่มเข้าไปใน list
+        self.parked_vehicles.append(actual_plate)
+        self.open_barrier() # เปิดไม้กั้นขึ้น
+        return actual_plate
+    
+    def _generate_temp_id(self):
+        # สร้าง ID TEMP ให้กับรถไม่มีทะเบียน
+        return f'TEMP-{datetime.now().strftime('%H%M%S')}'
+ 
     def parse_and_calculate_hours(self, entry_time_str, exit_time_str):
         '''แยกหน้าที่ แปลงเวลาและคำนวณชั่วโมง'''
         # แปลงข้อความเวลาเป็น Object ของ Python

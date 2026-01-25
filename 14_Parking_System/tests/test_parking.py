@@ -5,6 +5,14 @@ from src.logic.parking_lot import ParkingLot, OverLimitError, ParkingFullError
 
 class TestParkingLogic(unittest.TestCase):
 
+    def test_check_in_no_licese_plate(self):
+        '''ทดสอบกรณีรถไม่มีทะเบียน'''
+        logic = ParkingLot()
+        result = logic.check_in('')
+        self.assertTrue(result.startswith('TEMP-'))
+        self.assertIn(result, logic.parked_vehicles) # เช็คว่าบันทึกเข้าไปจริงๆ
+        self.assertEqual(len(logic.parked_vehicles), 1)
+
     def test_barrier_at_check_in(self):
         '''ทดสอบว่าไม้กั้นต้องเปิดเมื่อเช็คอินสำเร็จ'''
         logic = ParkingLot()
