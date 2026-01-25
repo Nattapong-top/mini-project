@@ -17,6 +17,7 @@ class ParkingLot:
         self.hour_limit = 24
         self.max_daily_fee = 200
         self.lost_ticket_penalty = 100
+        self.is_barrier_open = False
     
     def get_available_slots(self):
         '''คืนค่าจำนวนที่วางที่เหลืออยู่'''
@@ -30,6 +31,7 @@ class ParkingLot:
         
         # ถ้ามีที่ว่าง ก็เพิ่มเข้าไปใน list
         self.parked_vehicles.append(license_plate)
+        self.open_barrier() # เปิดไม้กั้นขึ้น
         return True
 
     def parse_and_calculate_hours(self, entry_time_str, exit_time_str):
@@ -59,9 +61,12 @@ class ParkingLot:
         # คำนวณเงิน
         fee = self.calculate_fee(hours, is_lost)
 
+        # สมมติว่ากระบวนการจ่ายเงินเสร็จสิ้นในฟังก์ชันนี้
+        print(f">>> [SYSTEM] รับเงิน {fee} บาท เรียบร้อย")
+
         # คืนที่ว่างที่จอดรถ
         self.parked_vehicles.remove(license_plate)
-
+        self.open_barrier()     # เปิดไม้กั้นเพื่อให้รถออก
         return fee
 
 
@@ -84,3 +89,19 @@ class ParkingLot:
             return max(self.lost_ticket_penalty, actual_fee)
         
         return actual_fee
+    
+    def close_barrier(self):
+        '''สั่งไม้้กั้นลง'''
+        print('>>> [SYSTEM] ไม้กั้นกำลังปิดลง...')
+        self.is_barrier_open = False
+
+    def open_barrier(self):
+        '''สั้งไม้กั้นขึ้น'''
+        print('>>> [SYSTEM] ไม้กั้นกำลังเปิดขึ้น...')
+        self.is_barrier_open = True
+    
+    def vehicle_passed(self):
+        '''เหตุการณ์เมื่อรถผ่านเซนเซอร์หลังไม้กั้น'''
+        self.close_barrier()
+
+    

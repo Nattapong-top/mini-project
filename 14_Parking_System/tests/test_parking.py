@@ -5,6 +5,27 @@ from src.logic.parking_lot import ParkingLot, OverLimitError, ParkingFullError
 
 class TestParkingLogic(unittest.TestCase):
 
+    def test_barrier_at_check_in(self):
+        '''ทดสอบว่าไม้กั้นต้องเปิดเมื่อเช็คอินสำเร็จ'''
+        logic = ParkingLot()
+        # เริ่มต้นไม้กั้นต้องปิด
+        self.assertFalse(logic.is_barrier_open)
+
+        logic.check_in('ป๋า-999')
+        # หลังเช็คอินสำเร็จ ไม้กั้นต้องปิด
+        self.assertTrue(logic.is_barrier_open)
+
+
+    def test_barrier_closes_after_vehicle_passed(self):
+        '''ทดสอบว่าไม้กั้นต้องลงเมื่อรถผ่านไปแล้ว'''
+        logic = ParkingLot()
+
+        logic.check_in('ป๋า-999')
+
+        logic.vehicle_passed() # จำลองเหตุการณ์รถขับผ่านเซนเซอร์
+        self.assertFalse(logic.is_barrier_open) # ไม้กั้นต้องปิดลง
+
+
     def test_check_out_ticket_lost_higt_fee(self):
         # เทสกรณีบัตรหาย เวลามากว่า 12 ชั่วโมง  = 200
         logic = ParkingLot()
