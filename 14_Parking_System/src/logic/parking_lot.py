@@ -32,7 +32,18 @@ class ParkingLot:
         self.parked_vehicles.append(license_plate)
         return True
 
-    # def test_
+    def check_out(self, license_plate, entry_time_str, exit_time_str):
+        # เช็คว่ามีรถในระบบไหม
+        if license_plate not in self.parked_vehicles:
+            raise ValueError('ไม่พบทะเบียนรถนี้ในระบบ')
+    
+    # คำนวณเงิน
+        fee = self.calculate_fee(entry_time_str, exit_time_str)
+
+        # คืนที่ว่างที่จอดรถ
+        self.parked_vehicles.remove(license_plate)
+
+        return fee
 
 
     def validate_duration(self, hours):
