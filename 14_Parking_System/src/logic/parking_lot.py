@@ -9,10 +9,37 @@ class ParkingFullError(Exception):
     '''Exception เมื่อที่จอดรถเต็ม'''
     pass
 
+class TimeService:
+    '''Class กลางสำหรับจัดการเรื่องเวลา (Time Utility)'''
+    FORMAT = '%Y-%m-%d %H:%M:%S'
+
+    @staticmethod
+    def get_now_str():
+        '''ดึงเวลาปัจจุบันในรูปแบบข้อความ'''
+        return datetime.now().strftime(TimeService.FORMAT)
+
+    @staticmethod
+    def calculate_hours(entry_time_str, exit_time_str=None):
+        '''คำนวณชั่วโมงระหว่างเวลาเข้าและออก'''
+        entry_time = datetime.strptime(entry_time_str, TimeService.FORMAT)
+
+        if exit_time_str:
+            exit_time = datetime.strptime(exit_time_str, TimeService.FORMAT)
+        else:
+            exit_time = datetime.now()
+
+        duration = exit_time - entry_time
+        total_seconds = duration.total_seconds()
+
+        # ปัดเศษชั่วโมงขึ้น (1 นาที ก็นับเป็น 1 ชม.)
+        hours = math.ceil(total_seconds / 3600)
+        return hours
+
+
 class ParkingLot:
     def __init__(self, capacity=10):
         self.capacity = capacity
-        self.parked_vehicles = []
+        self.parked_vehicles = {}
         self.hourly_rate = 20
         self.hour_limit = 24
         self.max_daily_fee = 200
@@ -23,7 +50,7 @@ class ParkingLot:
         '''คืนค่าจำนวนที่วางที่เหลืออยู่'''
         return self.capacity - len(self.parked_vehicles)
     
-    def check_in(self, license_plate):
+    def check_in(self, license_plate, entry_time=None):
         '''รับรถเข้าจอด'''
         # กฎเหล็ก ถ้าที่ว่างไม่เหลือแล้ว (เป็น 0 หรือน้อยกว่า) ให้แจ้ง
         if self.get_available_slots() <= 0:
@@ -37,34 +64,25 @@ class ParkingLot:
         
 
         # ถ้ามีที่ว่าง ก็เพิ่มเข้าไปใน list
-        self.parked_vehicles.append(actual_plate)
+        self.parked_vehicles[actual_plate] = entry_time if entry_time else TimeService.get_now_str()
         self.open_barrier() # เปิดไม้กั้นขึ้น
         return actual_plate
     
     def _generate_temp_id(self):
         # สร้าง ID TEMP ให้กับรถไม่มีทะเบียน
-        return f'TEMP-{datetime.now().strftime('%H%M%S')}'
+        return f'TEMP-{TimeService.get_now_str()}'
  
-    def parse_and_calculate_hours(self, entry_time_str, exit_time_str):
-        '''แยกหน้าที่ แปลงเวลาและคำนวณชั่วโมง'''
-        # แปลงข้อความเวลาเป็น Object ของ Python
-        entry_time = datetime.strptime(entry_time_str, '%Y-%m-%d %H:%M:%S')
-        exit_time = datetime.strptime(exit_time_str, '%Y-%m-%d %H:%M:%S') if exit_time_str else datetime.now()
-            
-        duration = exit_time - entry_time
-        
-        # ปัดเศษชั่วโมงขึ้น
-        total_seconds = duration.total_seconds()
-        return math.ceil(total_seconds / 3600)
 
-
-    def check_out(self, license_plate, entry, exit_time, is_lost=False):
+    def check_out(self, license_plate, exit_time=None, is_lost=False):
         # เช็คว่ามีรถในระบบไหม
         if license_plate not in self.parked_vehicles:
             raise ValueError('ไม่พบทะเบียนรถนี้ในระบบ')
 
+        # ดึงเวลาเข้าที่ระบบจำไว้ (ไม่ต้องกรอกเองแล้ว)
+        entry_time = self.parked_vehicles[license_plate]
+
         # คำนวณชั่งโมง เวลาเข้า เวลาออก รวมกี่ชั่วโมง
-        hours = self.parse_and_calculate_hours(entry, exit_time)
+        hours = TimeService.calculate_hours(entry_time, exit_time)
 
         # ถ้าจอดนานเกิน 24 ชั่วโมง ติดต่อพนักงาน
         self.validate_duration(hours)
@@ -76,10 +94,9 @@ class ParkingLot:
         print(f">>> [SYSTEM] รับเงิน {fee} บาท เรียบร้อย")
 
         # คืนที่ว่างที่จอดรถ
-        self.parked_vehicles.remove(license_plate)
+        del self.parked_vehicles[license_plate]
         self.open_barrier()     # เปิดไม้กั้นเพื่อให้รถออก
         return fee
-
 
     def validate_duration(self, hours):
         if hours > self.hour_limit:

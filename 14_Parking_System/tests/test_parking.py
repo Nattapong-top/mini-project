@@ -1,6 +1,6 @@
 import unittest
 from datetime import datetime, timedelta
-from src.logic.parking_lot import ParkingLot, OverLimitError, ParkingFullError
+from src.logic.parking_lot import ParkingLot, OverLimitError, ParkingFullError, TimeService
 
 
 class TestParkingLogic(unittest.TestCase):
@@ -27,9 +27,7 @@ class TestParkingLogic(unittest.TestCase):
     def test_barrier_closes_after_vehicle_passed(self):
         '''ทดสอบว่าไม้กั้นต้องลงเมื่อรถผ่านไปแล้ว'''
         logic = ParkingLot()
-
         logic.check_in('ป๋า-999')
-
         logic.vehicle_passed() # จำลองเหตุการณ์รถขับผ่านเซนเซอร์
         self.assertFalse(logic.is_barrier_open) # ไม้กั้นต้องปิดลง
 
@@ -37,10 +35,10 @@ class TestParkingLogic(unittest.TestCase):
     def test_check_out_ticket_lost_higt_fee(self):
         # เทสกรณีบัตรหาย เวลามากว่า 12 ชั่วโมง  = 200
         logic = ParkingLot()
-        logic.check_in('กก-4322')
         entry = '2026-01-24 00:00:00'
+        logic.check_in('กก-4322', entry)
         exit_time = '2026-01-24 10:00:00'
-        fee = logic.check_out('กก-4322', entry, exit_time, is_lost=True)
+        fee = logic.check_out('กก-4322', exit_time, is_lost=True)
 
         self.assertEqual(fee, 160)
 
@@ -48,10 +46,10 @@ class TestParkingLogic(unittest.TestCase):
     def test_check_out_ticket_lost_max_fee(self):
         # เทสกรณีบัตรหาย เวลามากว่า 12 ชั่วโมง  = 200
         logic = ParkingLot()
-        logic.check_in('กก-4322')
         entry = '2026-01-24 00:00:00'
+        logic.check_in('กก-4322', entry)
         exit_time = '2026-01-24 13:00:00'
-        fee = logic.check_out('กก-4322', entry, exit_time, is_lost=True)
+        fee = logic.check_out('กก-4322', exit_time, is_lost=True)
 
         self.assertEqual(fee, 200)
 
@@ -59,26 +57,27 @@ class TestParkingLogic(unittest.TestCase):
     # เทสกรณีบัตรหาย ไม่เกินเวลา = 100
     def test_check_out_ticket_lost_nomal_100(self):
         logic = ParkingLot()
-        logic.check_in('งง-321')
         entry = '2026-01-24 10:00:00'
+        logic.check_in('งง-321', entry)
         exit_time = '2026-01-24 13:00:00'
-        fee = logic.check_out('งง-321', entry, exit_time, is_lost=True)
+        fee = logic.check_out('งง-321', exit_time, is_lost=True)
 
         self.assertEqual(fee, 100)
 
     def test_check_out_successfully(self):
         logic = ParkingLot(capacity=10)
         # จอดรถออกก่อน 2 ขั่วโมง
-        logic.check_in('กข-1234')
         entry = '2026-01-24 10:00:00'
+        logic.check_in('กข-1234', entry)
         exit_time = '2026-01-24 13:00:00'
-        fee = logic.check_out('กข-1234', entry, exit_time)
+        fee = logic.check_out('กข-1234', exit_time)
 
         self.assertEqual(fee, 20)
         self.assertEqual(logic.get_available_slots(), 10)
 
 
     def test_check_in_vehicle_successfully(self):
+        # เทสการนับช่องว่างที่จอด 
         logic = ParkingLot(capacity=2)
         result = logic.check_in('กข-1234')
         self.assertTrue(result)
@@ -98,7 +97,7 @@ class TestParkingLogic(unittest.TestCase):
         # ผลลัพธ์ที่คาดหวัง คือ 0 บาท
         entry = '2026-01-24 10:00:00'
         exit_time = '2026-01-24 12:00:00'
-        hours = logic.parse_and_calculate_hours(entry, exit_time)
+        hours = TimeService.calculate_hours(entry, exit_time)
         fee = logic.calculate_fee(hours) 
         self.assertEqual(fee, 0)
 
@@ -108,7 +107,7 @@ class TestParkingLogic(unittest.TestCase):
         # ผลลัพธ์ที่คาดหวัง คือ (3-2) * 20 = 20 บาท
         entry = '2026-01-24 10:00:00'
         exit_time = '2026-01-24 13:00:00'
-        hours = logic.parse_and_calculate_hours(entry, exit_time)
+        hours = TimeService.calculate_hours(entry, exit_time)
         fee = logic.calculate_fee(hours)
         self.assertEqual(fee, 20)
 
@@ -118,7 +117,7 @@ class TestParkingLogic(unittest.TestCase):
         # ผลลัพธ์ที่คาดหวัง คือ (3-2) * 20 = 20 บาท
         entry = '2026-01-24 00:00:00'
         exit_time = '2026-01-24 12:00:00'
-        hours = logic.parse_and_calculate_hours(entry_time_str=entry, exit_time_str=exit_time)
+        hours = TimeService.calculate_hours(entry, exit_time)
         fee = logic.calculate_fee(hours)
         self.assertEqual(fee, 200)
 
@@ -126,7 +125,7 @@ class TestParkingLogic(unittest.TestCase):
         logic = ParkingLot()
         entry = '2026-01-23 00:00:00'
         exit_time = '2026-01-24 12:00:00'
-        hours = logic.parse_and_calculate_hours(entry_time_str=entry, exit_time_str=exit_time)
+        hours = TimeService.calculate_hours(entry, exit_time)
         
         # ตรวจสอบว่าแจ้ง Error ออกมาเมื่อจอดเจอเวลาหรือไม่
         with self.assertRaises(OverLimitError):
