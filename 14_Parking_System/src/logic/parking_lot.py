@@ -37,7 +37,8 @@ class TimeService:
 
 
 class ParkingLot:
-    def __init__(self, capacity=10):
+    def __init__(self, capacity=10, repository=None):
+        self.repository = repository
         self.capacity = capacity
         self.parked_vehicles = {}
         self.hourly_rate = 20
@@ -45,6 +46,7 @@ class ParkingLot:
         self.max_daily_fee = 200
         self.lost_ticket_penalty = 100
         self.is_barrier_open = False
+        self.parked_vehicles = self.repository.load_all() if repository else {}
     
     def get_available_slots(self):
         '''คืนค่าจำนวนที่วางที่เหลืออยู่'''
@@ -65,6 +67,9 @@ class ParkingLot:
 
         # ถ้ามีที่ว่าง ก็เพิ่มเข้าไปใน list
         self.parked_vehicles[actual_plate] = entry_time if entry_time else TimeService.get_now_str()
+        if self.repository:
+            self.repository.save_all(self.parked_vehicles)
+
         self.open_barrier() # เปิดไม้กั้นขึ้น
         return actual_plate
     
