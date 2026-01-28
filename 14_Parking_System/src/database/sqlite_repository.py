@@ -36,3 +36,14 @@ class SqliteRepository:
         # สั่งรันคำสั่ง sql พร้อมส่งตัวแทนเข้าไปแทนที่ ?
         cursor.execute(query, (license_plate,))
         self.conn.commit()
+
+    def check_vehicle_in_parking(self, license_plate):
+        cursor = self.conn.cursor()
+
+        query = 'SELECT license_plate FROM active_parking WHERE license_plate = ?'
+        cursor.execute(query, (license_plate,))
+        result = cursor.fetchone()
+
+        if result:
+            return result[0]
+        return None

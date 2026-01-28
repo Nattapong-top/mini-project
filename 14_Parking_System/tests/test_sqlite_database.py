@@ -31,7 +31,17 @@ def test_remove_vehicle(repo):
     repo.show_all_vehicle_in_parking()
     assert license_plate
 
+def test_check_vehicle_in_parking(repo):
+
+    repo.save_vehicle_in_parking('รถซิ่ง-007', '2026-01-27 11:00:00')
+    check_vehicle_in_parking = repo.check_vehicle_in_parking('รถซิ่ง-007')
+    assert check_vehicle_in_parking == 'รถซิ่ง-007'
+
+def test_connot_park_duplicate_license_plate(repo):
+    license_plate = 'รถซิ่ง-007'
+    repo.save_vehicle_in_parking(license_plate, '2026-01-27 11:00:00')
+    existing_vehicle = repo.check_vehicle_in_parking(license_plate)
+    assert existing_vehicle != None
 
 
-        
-    
+
