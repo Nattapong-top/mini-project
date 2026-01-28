@@ -43,5 +43,5 @@ def test_connot_park_duplicate_license_plate(repo):
     existing_vehicle = repo.check_vehicle_in_parking(license_plate)
     assert existing_vehicle != None
 
-
+    
 
