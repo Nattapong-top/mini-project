@@ -38,6 +38,7 @@ class TimeService:
 
 class ParkingLot:
     def __init__(self, capacity=10, repository=None):
+        self.repository = repository
         self.capacity = capacity
         self.repository = repository
         self.parked_vehicles = {}
@@ -67,6 +68,9 @@ class ParkingLot:
 
         # ถ้ามีที่ว่าง ก็เพิ่มเข้าไปใน list
         self.parked_vehicles[actual_plate] = entry_time if entry_time else TimeService.get_now_str()
+        if self.repository:
+            self.repository.save_all(self.parked_vehicles)
+
         self.open_barrier() # เปิดไม้กั้นขึ้น
         return actual_plate
     
