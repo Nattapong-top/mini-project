@@ -20,3 +20,5 @@ class ParkingService:
         self.repo.save_vehicle_in_parking(license_plate)
         return f'Success: รถทะเบียน {license_plate} ออกเรียบร้อย!'
     
+    # def count_all_vehicle_in_parking(self):
+    #     self.repo.

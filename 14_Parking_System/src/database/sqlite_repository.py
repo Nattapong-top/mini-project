@@ -47,3 +47,12 @@ class SqliteRepository:
         if result:
             return result[0]
         return None
+    
+    def count_all_vehicle_in_parking(self):
+        cursor = self.conn.cursor()
+        cursor.execute('SELECT COUNT (license_plate) FROM active_parking')
+        count = cursor.fetchone()
+
+        if count:
+            return count[0]
+        return 0

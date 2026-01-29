@@ -44,4 +44,9 @@ def test_connot_park_duplicate_license_plate(repo):
     assert existing_vehicle != None
 
     
+def test_count_all_vehicle_in_parking(repo):
+    license_plate = 'รถซิ่ง-007'
+    repo.save_vehicle_in_parking(license_plate, '2026-01-27 11:00:00')
 
+    count = repo.count_all_vehicle_in_parking()
+    assert count == 1
