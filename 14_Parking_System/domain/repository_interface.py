@@ -1,0 +1,13 @@
+from abc import ABC, abstractmethod
+
+
+class ParkingRepository(ABC):
+    @abstractmethod
+    def save(self, ticket: ParkingTicket):
+        pass
+
+    @abstractmethod
+    def get_by_plate(self, plate: LicensePlate):
+        pass
+
+    
