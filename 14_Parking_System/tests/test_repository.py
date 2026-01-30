@@ -9,12 +9,12 @@ def test_repository_can_save_and_retrieve_a_ticket():
     repo = SqliteParkingRepository(':memory:')
     repo.create_tables() #ต้องมีคำสั่ง สร้าง tables ด้วย
 
-    plate = LicensePlate('กข-1234')
+    plate = LicensePlate(value='กข-1234')
     entry_now = datetime.now()
     ticket = ParkingTicket(license_plate=plate, entry_time=entry_now)
 
     # 2. Act (สั่งรันสิ่งที่อยากทดสอบ)
-    repo.seve(ticket)
+    repo.save(ticket)
     retrieved_ticket = repo.get_by_plate(plate)
 
     # 3. Assert (ตรวจสอบผลลัพธ์)
