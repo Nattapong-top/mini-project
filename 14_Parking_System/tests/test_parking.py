@@ -6,6 +6,38 @@ from domain.models import (
     PricingPolicy, 
     OverLimitError)
 
+from domain.barrier_service import ParkingRegistrationService
+from domain.barrier_interfaces import BarrierInterface
+
+class BarrierSpy(BarrierInterface):
+    def __init__(self):
+        self.is_open = False    # สร้างสถานะ ไว้เช็คเองในตัวปลอม
+
+    def open(self) -> None:
+        self.is_open = True     # สั่งเปิดต้องเปลี่ยนเป็น True
+    
+    def close(self):
+        self.is_open = False    
+
+def test_barrier_should_open_on_successful_check_in(fixed_now):
+    # 1. Arrange (เตรียมของ)
+    # สมมติเรามี BarrierService ที่คอยสั่งการไม้กั้น
+    # ใน Unit Test เราจะใช้ Mock เพื่อดูว่ามันถูกสั่งให้ "เปิด" หรือไม่
+    barrier_service = BarrierSpy()
+    parking_service = ParkingRegistrationService(barrier=barrier_service)
+
+    license_plate = LicensePlate(value='รวย-1111')
+
+    # 2. Act (ลงมือทำ)
+    # เมื่อรถทำการ Check-in
+    ticket = parking_service.register_entry(license_plate, entry_time=fixed_now)
+    
+    # 3. Assert (ตรวจสอบผล)
+    # ตรวจสอบว่า barrier_service ถูกสั่งให้เปิด (open) จริงๆ ใช่ไหม
+    assert barrier_service.is_open is True
+    assert ticket.license_plate == license_plate
+    
+
 def test_ticket_is_lost_fee_200_over_12_hours(standard_policy, fixed_now) -> int:
     entry_time = fixed_now - timedelta(hours=14)
     ticket = ParkingTicket(license_plate=LicensePlate(value='รวย-1111'), entry_time=entry_time)
