@@ -4,9 +4,10 @@ from domain.models import (
     ParkingTicket, 
     LicensePlate, 
     PricingPolicy, 
-    OverLimitError)
+    OverLimitError,
+    MoneyThb)
 
-from domain.barrier_service import ParkingRegistrationService
+from domain.services import ParkingRegistrationService
 from domain.barrier_interfaces import BarrierInterface
 
 class BarrierSpy(BarrierInterface):
@@ -18,6 +19,26 @@ class BarrierSpy(BarrierInterface):
     
     def close(self):
         self.is_open = False    
+
+
+def test_barrier_should_not_open_if_payment_is_incomplete(fixed_now, standard_policy):
+    # 1. Arrange: เตรียมรถที่จอดอยู่แล้ว (มี Ticket ในระบบ)
+    spy = BarrierSpy()
+    service = ParkingRegistrationService(barrier=spy)
+    
+    # สมมติว่ามีตั๋วอยู่แล้วในระบบ และมียอดต้องชำระ 40 บาท
+    # ... (เดี๋ยวป๋าลองนึกดูว่าต้องเซ็ตอัพยังไง) ...
+    entry_time = fixed_now - timedelta(hours=4)
+    ticket_id = ParkingTicket(license_plate=LicensePlate(value='รวย-1111'), entry_time=entry_time)
+    fee = ticket_id.calculate_fee(current_time=fixed_now, Policy=standard_policy)
+
+    # 2. Act: พยายามจะ Check-out โดยไม่จ่ายเงิน
+    payment = MoneyThb(value=0)
+    service.check_out(ticket_id, payment, fee)
+
+    # 3. Assert: พยาน (Spy) ต้องยืนยันว่าไม้กั้น "ปิดสนิท"
+    assert spy.is_open is False, "ป๋า! ลูกค้ายังไม่จ่ายเงิน แต่ไม้กั้นเปิดได้ไง!"
+
 
 def test_barrier_should_open_on_successful_check_in(fixed_now):
     # 1. Arrange (เตรียมของ)

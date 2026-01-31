@@ -13,6 +13,21 @@ class OverLimitError(Exception):
     '''Exception สำหรับกรณีจอดรถเกินเวลาที่กำหนด'''
     pass
 
+class MoneyThb(BaseModel):
+    # เงินต้องไม่มีค่าเป็นลบ
+    value: float = Field(ge=0, description='จำนวนเงินบาทไทย')
+
+    def __add__(self, other):
+        return MoneyThb(value=self.value + other.value)
+    
+    def __eq__(self, other):
+        if isinstance(other, MoneyThb):
+            return self.value == other.value
+        if isinstance(other, (int, float)):
+            return self.value == other
+        return False
+
+
 class LicensePlate(BaseModel):
     value: str = Field(..., min_length=1, max_length=10)
 
@@ -21,7 +36,7 @@ class ParkingTicket(BaseModel):
     entry_time: datetime
     version: int = 1
 
-    def calculate_fee(self, current_time: datetime, Policy: PricingPolicy, is_lost: bool = False) -> int:
+    def calculate_fee(self, current_time: datetime, Policy: PricingPolicy, is_lost: bool = False) -> MoneyThb:
         # 1. คำนวณชั่วโมง
         duration = current_time - self.entry_time
         hours = math.ceil(duration.total_seconds() / 3600)
@@ -39,6 +54,7 @@ class ParkingTicket(BaseModel):
 
         # 5. กรณีบัตรหาย: เลือกค่าที่แพงกว่าระหว่าง ค่าปรับ กับ ค่าจอดจริง
         if is_lost:
-            return max(Policy.lost_ticket_penalty, final_fee)
+            max_fee = max(Policy.lost_ticket_penalty, final_fee)
+            return MoneyThb(value=max_fee)
             
-        return final_fee
+        return MoneyThb(value=final_fee)

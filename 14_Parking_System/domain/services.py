@@ -1,6 +1,6 @@
 import datetime
 from domain.barrier_interfaces import BarrierInterface
-from domain.models import LicensePlate, ParkingTicket
+from domain.models import LicensePlate, ParkingTicket, MoneyThb
 
 # domain/services.py
 class ParkingRegistrationService:
@@ -16,3 +16,10 @@ class ParkingRegistrationService:
         # ---------------------------
         
         return ticket
+
+    def check_out(self, ticket:ParkingTicket, payment:MoneyThb, fee:MoneyThb) -> bool:
+        
+        if payment.value >= fee.value:
+            self.barrier.open()
+            return True
+        return False
