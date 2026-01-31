@@ -5,8 +5,13 @@ from datetime import datetime
 
 # ขอกำหนดต่างๆ bissiness
 class PricingPolicy(BaseModel):
-    hourly_rate: int = 40
+    hourly_rate: int = 20
     free_hour: int = 2
+    hour_limit: int = 24
+
+class OverLimitError(Exception):
+    '''Exception สำหรับกรณีจออดรถเกินเวลาที่กำหนด'''
+    pass
 
 # Value Object: ห้ามใช้ str ตรงๆ
 class LicensePlate(BaseModel):
@@ -24,9 +29,14 @@ class ParkingTicket(BaseModel):
         
         hours = math.ceil(total_seconds / 3600)
         
-        # ฟรี 2 ชั่งโมงแรก ชั่วโมงต่อไป 40 บาท
+        # เช็กขีดจำกัดก่อน (Guard Clause)
+        if hours > Policy.hour_limit:
+            raise OverLimitError('จอดเกินเวลา กรุณาติดต่อพนักงาน')
+
+        # ฟรี 2 ชั่งโมงแรก ชั่วโมงต่อไป 20 บาท 
         if hours <= Policy.free_hour:
             return 0
-        else:
-            fee = (hours - 2) * Policy.hourly_rate
-            return fee
+        
+        # หักลบ ชั่วโมง ฟรี ออกจากการคำนวณ
+        fee = (hours - Policy.free_hour) * Policy.hourly_rate
+        return fee
