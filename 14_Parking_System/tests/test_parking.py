@@ -8,14 +8,14 @@ from domain.models import (
 
 def test_ticket_is_lost_fee_200_over_12_hours(standard_policy, fixed_now) -> int:
     entry_time = fixed_now - timedelta(hours=14)
-    ticket = ParkingTicket(license_plate=LicensePlate(value='รวย-1111'), entry_time=entry_time, is_lost=True)
+    ticket = ParkingTicket(license_plate=LicensePlate(value='รวย-1111'), entry_time=entry_time)
     fee = ticket.calculate_fee(current_time=fixed_now, Policy=standard_policy, is_lost=True)
 
     assert fee == 200
 
 def test_ticket_is_lost_fee_100_under_2_hours(standard_policy, fixed_now) -> int:
     entry_time = fixed_now - timedelta(hours=1)
-    ticket = ParkingTicket(license_plate=LicensePlate(value='รวย-1111'), entry_time=entry_time, is_lost=True)
+    ticket = ParkingTicket(license_plate=LicensePlate(value='รวย-1111'), entry_time=entry_time)
     fee = ticket.calculate_fee(current_time=fixed_now, Policy=standard_policy, is_lost=True)
 
     assert fee == 100
