@@ -19,7 +19,7 @@ class ParkingRegistrationService:
 
     def check_out(self, ticket:ParkingTicket, payment:MoneyThb, fee:MoneyThb) -> bool:
         
-        if payment.value >= fee.value:
+        if payment >= fee:
             self.barrier.open()
             return True
         return False

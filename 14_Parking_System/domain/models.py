@@ -1,6 +1,8 @@
 import math
 from pydantic import BaseModel, Field
 from datetime import datetime
+from .value_objects import LicensePlate, MoneyThb
+from .exceptions import OverLimitError, InsufficientPaymentError
 
 class PricingPolicy(BaseModel):
     hourly_rate: int = 20
@@ -9,27 +11,6 @@ class PricingPolicy(BaseModel):
     max_daily: int = 200
     lost_ticket_penalty: int = 100
 
-class OverLimitError(Exception):
-    '''Exception สำหรับกรณีจอดรถเกินเวลาที่กำหนด'''
-    pass
-
-class MoneyThb(BaseModel):
-    # เงินต้องไม่มีค่าเป็นลบ
-    value: float = Field(ge=0, description='จำนวนเงินบาทไทย')
-
-    def __add__(self, other):
-        return MoneyThb(value=self.value + other.value)
-    
-    def __eq__(self, other):
-        if isinstance(other, MoneyThb):
-            return self.value == other.value
-        if isinstance(other, (int, float)):
-            return self.value == other
-        return False
-
-
-class LicensePlate(BaseModel):
-    value: str = Field(..., min_length=1, max_length=10)
 
 class ParkingTicket(BaseModel):
     license_plate: LicensePlate
@@ -55,6 +36,6 @@ class ParkingTicket(BaseModel):
         # 5. กรณีบัตรหาย: เลือกค่าที่แพงกว่าระหว่าง ค่าปรับ กับ ค่าจอดจริง
         if is_lost:
             max_fee = max(Policy.lost_ticket_penalty, final_fee)
-            return MoneyThb(value=max_fee)
+            return MoneyThb(value=float(max_fee))
             
-        return MoneyThb(value=final_fee)
+        return MoneyThb(value=float(final_fee))
