@@ -1,5 +1,7 @@
 from domain.repository_interface import ParkingRepository
-from domain.models import ParkingTicket, LicensePlate
+from domain.models import ParkingTicket
+from domain.value_objects import LicensePlate
+from domain.exceptions import ConcurencyError
 from datetime import datetime
 import sqlite3
 
@@ -21,7 +23,7 @@ class SqliteParkingRepository(ParkingRepository):
 
     def save(self, ticket: ParkingTicket):
         cursor = self.conn.cursor()
-        # แปลง Onject กลับเป็น data เพื่อลง DB
+        # แปลง Object กลับเป็น data เพื่อลง DB
         plate_str = ticket.license_plate.value
         time_str = ticket.entry_time.isoformat()
 
@@ -35,6 +37,11 @@ class SqliteParkingRepository(ParkingRepository):
                 version=active_parking.version + 1
             WHERE active_parking.version = ?
         ''', (plate_str, time_str, ticket.version, ticket.version))
+        
+        # ถ้าไม่มีแถวไหนโดนอัปเดตเลย (rowcount == 0) แปลว่า version ไม่ตรง
+        if cursor.rowcount == 0:
+            raise ConcurencyError(f'ข้อมูลรถ {plate_str} ถูกคนอื่นแก้ไขไปแล้ว')
+
         self.conn.commit()
         
     def get_by_plate(self, plate: LicensePlate) -> ParkingTicket:

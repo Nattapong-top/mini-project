@@ -7,3 +7,6 @@ class OverLimitError(Exception):
 class InsufficientPaymentError(Exception):
     """Exception สำหรับกรณีจ่ายเงินไม่ครบ"""
     pass
+
+class ConcurencyError(Exception):
+    '''Exception คนอื่นแก้ไขข้อมูลไปแล้ว'''
