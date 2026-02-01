@@ -59,3 +59,8 @@ class SqliteParkingRepository(ParkingRepository):
             )
         return None
     
+    def remove(self, plate: LicensePlate):
+        cursor = self.conn.cursor()
+        cursor.execute('DELETE FROM active_parking WHERE license_plate = ?', (plate.value,))
+        self.conn.commit()
+        print(f"--- ป๋าครับ! ลบ {plate.value} ออกจากรายการจอดปัจจุบันแล้ว ---")

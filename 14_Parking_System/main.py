@@ -8,7 +8,7 @@ sys.path.append(os.path.join(os.path.dirname(__file__), 'src'))
 
 # Import ของที่ป๋าทำมาทั้งหมด
 from domain.services import ParkingRegistrationService
-from domain.models import PricingPolicy
+from domain.models import PricingPolicy, LicensePlate
 from adapters.sqlite_repository import SqliteParkingRepository
 from src.ui.app import ParkingApp # หน้า Check-in ที่เราคุยกัน
 # สมมติป๋าแยกหน้า Checkout ไว้ หรือจะเขียนรวมในนี้เลยก็ได้
@@ -70,14 +70,19 @@ class MainApplication(ctk.CTk):
             print(f"Error: {e}")
 
     def do_out(self):
-        from domain.value_objects import LicensePlate, MoneyThb
         try:
-            plate = LicensePlate(value=self.entry_out.get())
-            # ดึงตั๋วมาโชว์เงินก่อน (Logic ง่ายๆ สำหรับ Demo)
+            plate_str = self.entry_out.get().strip()
+            if not plate_str: return # ถ้าไม่กรอกก็ไม่ต้องทำอะไร
+            
+            plate = LicensePlate(value=plate_str)
             ticket = self.repo.get_by_plate(plate)
+            
+            if ticket is None:
+                self.lbl_fee.configure(text="ยอดเงิน: ไม่พบรถคันนี้")
+                return # หยุดทำงานทันที ไม่ให้ไปรัน calculate_fee
+
             fee = ticket.calculate_fee(datetime.now(), self.policy)
             self.lbl_fee.configure(text=f"ยอดเงิน: {fee.value} บาท")
-            # จ่ายเงิน (สมมติจ่ายครบ)
             self.service.process_payment(plate, fee, datetime.now())
         except Exception as e:
             print(f"Error: {e}")

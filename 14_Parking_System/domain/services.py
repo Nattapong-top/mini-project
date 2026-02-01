@@ -72,6 +72,9 @@ class ParkingRegistrationService:
                 f"ป๋าครับ! เงินไม่พอ ยอดต้องจ่าย {fee.value} แต่จ่ายมา {payment.value}"
             )
         
+        # --- จ่ายเงินครบแล้ว ลบออกจากตาราง Active เลยครับป๋า ---
+        self.repository.remove(plate)
+        
         # --- ส่วนที่ต้องเพิ่ม: บันทึกสถานะลงสมุดบัญชี ---
         ticket.is_paid = True
         ticket.paid_amount = payment
@@ -79,7 +82,7 @@ class ParkingRegistrationService:
         
         # สำคัญมาก: ต้องสั่งเซฟกลับไปที่ Repo ด้วย!
         # (นี่แหละครับที่ Optimistic Locking จะช่วยเช็คว่ามีใครมาแก้ตัดหน้าไหม)
-        self.repository.save(ticket)
+        # self.repository.save(ticket)
         
         # 4. เปิดไม้กั้น
         self.barrier.open()
