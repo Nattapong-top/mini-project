@@ -16,7 +16,7 @@ from src.ui.app import ParkingApp # หน้า Check-in ที่เราค�
 class MainApplication(ctk.CTk):
     def __init__(self):
         super().__init__()
-        self.title("Paa Parking System - DDD & Clean Architecture")
+        self.title("Paa Top IT Parking System - DDD & Clean Architecture")
         self.geometry("500x600")
         ctk.set_appearance_mode("dark")
 
@@ -62,6 +62,15 @@ class MainApplication(ctk.CTk):
 
     def do_in(self):
         from domain.value_objects import LicensePlate
+        # 1. ดึงค่าและตัดช่องว่างหัวท้ายออก
+        plate_str = self.entry_in.get().strip()
+        
+        # 2. เช็คก่อนส่ง: ถ้าว่าง ป๋าไม่ต้องส่งไปให้ Pydantic ด่าครับ
+        if not plate_str:
+            from tkinter import messagebox
+            messagebox.showwarning("เตือนสติ", "ป๋าครับ! ใส่ทะเบียนรถก่อนสิ")
+            return
+        
         try:
             plate = LicensePlate(value=self.entry_in.get())
             self.service.register_entry(plate, datetime.now())
@@ -70,22 +79,41 @@ class MainApplication(ctk.CTk):
             print(f"Error: {e}")
 
     def do_out(self):
-        try:
+            from domain.value_objects import LicensePlate, MoneyThb
+            from tkinter import messagebox
+            
+            # 1. ดึงค่าและเช็คค่าว่าง (ป้องกัน Pydantic Error)
             plate_str = self.entry_out.get().strip()
-            if not plate_str: return # ถ้าไม่กรอกก็ไม่ต้องทำอะไร
-            
-            plate = LicensePlate(value=plate_str)
-            ticket = self.repo.get_by_plate(plate)
-            
-            if ticket is None:
-                self.lbl_fee.configure(text="ยอดเงิน: ไม่พบรถคันนี้")
-                return # หยุดทำงานทันที ไม่ให้ไปรัน calculate_fee
+            if not plate_str:
+                messagebox.showwarning("เตือนสติ", "ป๋าครับ! ต้องใส่ทะเบียนรถขาออกด้วยนะ")
+                return
 
-            fee = ticket.calculate_fee(datetime.now(), self.policy)
-            self.lbl_fee.configure(text=f"ยอดเงิน: {fee.value} บาท")
-            self.service.process_payment(plate, fee, datetime.now())
-        except Exception as e:
-            print(f"Error: {e}")
+            try:
+                plate = LicensePlate(value=plate_str)
+                
+                # 2. ไปดึงตั๋วมาจากโกดัง
+                ticket = self.repo.get_by_plate(plate)
+                
+                # 3. เช็คก่อนว่าเจอรถไหม (ป้องกัน NoneType Error)
+                if ticket is None:
+                    self.lbl_fee.configure(text="ยอดเงิน: ไม่พบรถคันนี้จอดอยู่", text_color="red")
+                    messagebox.showerror("ไม่พบข้อมูล", f"ป๋าครับ! รถทะเบียน {plate_str} ไม่ได้อยู่ในระบบนะ")
+                    return
+
+                # 4. ถ้าเจอรถ ก็คำนวณเงินและโชว์ยอด
+                fee = ticket.calculate_fee(datetime.now(), self.policy)
+                self.lbl_fee.configure(text=f"ยอดเงินที่ต้องจ่าย: {fee.value} บาท", text_color="yellow")
+                
+                # 5. เรียก Service ประมวลผลการจ่ายเงิน
+                # (ใน Demo นี้สมมติว่าลูกค้าจ่ายครบเท่ากับค่า fee เลยครับ)
+                self.service.process_payment(plate, fee, datetime.now())
+                
+                messagebox.showinfo("สำเร็จ", f"รถ {plate_str} จ่ายเงิน {fee.value} บาท\nไม้กั้นเปิดแล้วครับป๋า!")
+                self.entry_out.delete(0, 'end')
+                self.lbl_fee.configure(text="ยอดเงิน: 0 บาท", text_color="white")
+
+            except Exception as e:
+                messagebox.showerror("เกิดข้อผิดพลาด", f"ป๋าครับ! ระบบขัดข้อง: {str(e)}")
 
 if __name__ == "__main__":
     app = MainApplication()

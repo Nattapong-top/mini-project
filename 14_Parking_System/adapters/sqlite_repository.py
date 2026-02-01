@@ -6,7 +6,7 @@ from datetime import datetime
 import sqlite3
 
 class SqliteParkingRepository(ParkingRepository):
-    def __init__(self, db_path='/14_Parking_System/data/parking_system.db'):
+    def __init__(self, db_path='data/parking_system.db'):
         self.conn = sqlite3.connect(db_path)
 
     def create_tables(self):
