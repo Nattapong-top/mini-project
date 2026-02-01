@@ -23,6 +23,14 @@ class MoneyThb(BaseModel):
             return self.value >= other
         return False
 
+    # สอนให้มันรู้จักเครื่องหมาย "น้อยกว่า" (<)
+    def __lt__(self, other):
+        if isinstance(other, MoneyThb):
+            return self.value < other.value
+        if isinstance(other, (int, float)):
+            return self.value < other
+        return False
+
     # (แถม) เพื่อให้แสดงผลใน Log สวยๆ เวลา Test พัง
     def __repr__(self):
         return f"MoneyThb({self.value} THB)"

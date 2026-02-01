@@ -1,4 +1,4 @@
-from domain.repository_interface import ParkingRepository
+from adapters.repository_interface import ParkingRepository
 from domain.models import ParkingTicket
 from domain.value_objects import LicensePlate
 from domain.exceptions import ConcurrencyError

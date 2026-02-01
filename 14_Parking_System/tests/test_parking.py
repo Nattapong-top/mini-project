@@ -8,26 +8,18 @@ from domain.models import (
     MoneyThb)
 
 from domain.services import ParkingRegistrationService
-from domain.barrier_interfaces import BarrierInterface
-
-class BarrierSpy(BarrierInterface):
-    def __init__(self):
-        self.is_open = False    # สร้างสถานะ ไว้เช็คเองในตัวปลอม
-
-    def open(self) -> None:
-        self.is_open = True     # สั่งเปิดต้องเปลี่ยนเป็น True
-    
-    def close(self):
-        self.is_open = False    
+from domain.barrier_spay import BarrierSpy
+from adapters.InMemoryParkingRepository import InMemoryParkingRepository
 
 
 def test_barrier_should_not_open_if_payment_is_incomplete(fixed_now, standard_policy):
     # 1. Arrange: เตรียมรถที่จอดอยู่แล้ว (มี Ticket ในระบบ)
     spy = BarrierSpy()
-    service = ParkingRegistrationService(barrier=spy)
+    repo = InMemoryParkingRepository()
     
     # สมมติว่ามีตั๋วอยู่แล้วในระบบ และมียอดต้องชำระ 40 บาท
     # ... (เดี๋ยวป๋าลองนึกดูว่าต้องเซ็ตอัพยังไง) ...
+    service = ParkingRegistrationService(spy, repo, standard_policy)
     entry_time = fixed_now - timedelta(hours=4)
     ticket_id = ParkingTicket(license_plate=LicensePlate(value='รวย-1111'), entry_time=entry_time)
     fee = ticket_id.calculate_fee(current_time=fixed_now, Policy=standard_policy)
@@ -40,12 +32,13 @@ def test_barrier_should_not_open_if_payment_is_incomplete(fixed_now, standard_po
     assert spy.is_open is False, "ป๋า! ลูกค้ายังไม่จ่ายเงิน แต่ไม้กั้นเปิดได้ไง!"
 
 
-def test_barrier_should_open_on_successful_check_in(fixed_now):
+def test_barrier_should_open_on_successful_check_in(fixed_now, standard_policy):
     # 1. Arrange (เตรียมของ)
     # สมมติเรามี BarrierService ที่คอยสั่งการไม้กั้น
     # ใน Unit Test เราจะใช้ Mock เพื่อดูว่ามันถูกสั่งให้ "เปิด" หรือไม่
     barrier_service = BarrierSpy()
-    parking_service = ParkingRegistrationService(barrier=barrier_service)
+    repo = InMemoryParkingRepository()
+    parking_service = ParkingRegistrationService(barrier=barrier_service, repository=repo, policy=standard_policy)
 
     license_plate = LicensePlate(value='รวย-1111')
 

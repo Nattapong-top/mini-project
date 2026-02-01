@@ -1,4 +1,5 @@
 import math
+from typing import Optional
 from pydantic import BaseModel, Field
 from datetime import datetime
 from .value_objects import LicensePlate, MoneyThb
@@ -15,6 +16,9 @@ class PricingPolicy(BaseModel):
 class ParkingTicket(BaseModel):
     license_plate: LicensePlate
     entry_time: datetime
+    exit_time: Optional[datetime] = None
+    paid_amount: MoneyThb = MoneyThb(value=0)
+    is_paid: bool = False
     version: int = 1
 
     def calculate_fee(self, current_time: datetime, Policy: PricingPolicy, is_lost: bool = False) -> MoneyThb:

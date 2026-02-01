@@ -3,7 +3,7 @@ from datetime import datetime, timedelta
 from domain.models import ParkingTicket
 from domain.value_objects import LicensePlate
 from domain.exceptions import ConcurrencyError,OverLimitError, InsufficientPaymentError
-from domain.repository_interface import ParkingRepository
+from adapters.repository_interface import ParkingRepository
 from domain.services import ParkingRegistrationService
 from adapters.sqlite_repository import SqliteParkingRepository
 
