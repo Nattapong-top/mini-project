@@ -8,5 +8,5 @@ class InsufficientPaymentError(Exception):
     """Exception สำหรับกรณีจ่ายเงินไม่ครบ"""
     pass
 
-class ConcurencyError(Exception):
+class ConcurrencyError(Exception):
     '''Exception คนอื่นแก้ไขข้อมูลไปแล้ว'''

@@ -1,7 +1,7 @@
 from domain.repository_interface import ParkingRepository
 from domain.models import ParkingTicket
 from domain.value_objects import LicensePlate
-from domain.exceptions import ConcurencyError
+from domain.exceptions import ConcurrencyError
 from datetime import datetime
 import sqlite3
 
@@ -40,7 +40,7 @@ class SqliteParkingRepository(ParkingRepository):
         
         # ถ้าไม่มีแถวไหนโดนอัปเดตเลย (rowcount == 0) แปลว่า version ไม่ตรง
         if cursor.rowcount == 0:
-            raise ConcurencyError(f'ข้อมูลรถ {plate_str} ถูกคนอื่นแก้ไขไปแล้ว')
+            raise ConcurrencyError(f'ข้อมูลรถ {plate_str} ถูกคนอื่นแก้ไขไปแล้ว')
 
         self.conn.commit()
         
