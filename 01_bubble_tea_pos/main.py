@@ -1,0 +1,88 @@
+import os
+import datetime
+
+def load_menu(filename:str):
+    data = []
+    # ใช้ try-except กันเหนียวเผื่อไฟล์ไม่มี (แต่ถ้ายังไม่เรียน ตัด try ออกได้ครับ)
+    if not os.path.exists(filename):
+        return []
+        
+    with open(filename, encoding='utf-8') as list_data:
+        for line in list_data:
+            # กันเหนียวเผื่อบรรทัดว่าง
+            if line.strip(): 
+                parts = line.strip().split(',')
+                if len(parts) == 2:
+                    product, price = parts
+                    data.append([product, int(price)])
+    return data # <--- แก้ Indent แล้ว
+
+def show_menu(menu_list):
+    print('='*40)
+    print('      เมนูร้านชานม ป๋า POS ^_^ _/|\\_      ')
+    print('='*40)
+    for i, p in enumerate(menu_list):
+        # จัดหน้าสวยๆ ชิดซ้าย ชิดขวา
+        print(f'{i+1}. {p[0]:<20} {p[1]:>5} บาท')
+
+def save_sale(items, total):
+    filename = 'sales.txt'
+    now = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    # ใช้ join เพื่อรวมชื่อสินค้าเป็นก้อนเดียวคั่นด้วย comma
+    items_str = ",".join(items)
+    
+    with open(filename, 'a', encoding='utf-8') as data:
+        # บันทึก format: วันเวลา,รายการ,ราคารวม
+        data.write(f"{now},{items_str},{total}\n")
+
+def main():
+    filename = 'menu.txt'
+    
+    if not os.path.exists(filename):
+        print(f"หาไฟล์ {filename} ไม่เจอครับป๋า! สร้างไฟล์ก่อนนะ")
+        return
+
+    my_menu = load_menu(filename)
+    
+    orders = [] 
+    total_price = 0
+    
+    while True:
+        # Clear หน้าจอแบบบ้านๆ (พิมพ์บรรทัดว่างเยอะๆ) หรือจะไม่ใส่ก็ได้
+        print("\n"*2) 
+        show_menu(my_menu)
+        
+        print("-" * 40)
+        print(f"🛒 ตะกร้าของป๋า: {orders}")
+        print(f"💰 ยอดรวม: {total_price} บาท")
+        print("-" * 40)
+
+        choice = input("เลือกเมนู (ใส่เลข) หรือพิมพ์ 'q' เพื่อจบ/คิดเงิน: ")
+        
+        if choice == 'q':
+            break
+        elif choice.isdigit():
+            index = int(choice) - 1 # แปลงเลขมนุษย์ (1) เป็นเลขคอม (0)
+            
+            # ตรวจสอบว่าเลข index มีอยู่จริงใน list ไหม
+            if 0 <= index < len(my_menu):
+                selected_item = my_menu[index] # ได้ ['ชานม', 40]
+                
+                orders.append(selected_item[0]) # เก็บชื่อ
+                total_price += selected_item[1] # บวกราคา
+            else:
+                print("❌ ไม่มีเมนูเบอร์นี้นะครับ")
+                input("กด Enter เพื่อเลือกใหม่...") # ให้เวลารู้ตัวก่อน loop
+        else:
+            print("❌ พิมพ์เลข หรือ q เท่านั้นครับ")
+
+    # --- จบการทำงาน ---
+    if total_price > 0:
+        print(f"\n>>> สรุปยอดเงินทั้งสิ้น: {total_price} บาท <<<")
+        save_sale(orders, total_price)
+        print("✅ บันทึกยอดขายลง sales.txt เรียบร้อย! ขอบคุณที่อุดหนุนครับ")
+    else:
+        print("ยกเลิกการขาย (ไม่ได้สั่งอะไร)")
+
+if __name__ == "__main__":
+    main()

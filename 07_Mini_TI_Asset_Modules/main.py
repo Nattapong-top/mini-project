@@ -1,0 +1,40 @@
+'''🚀 Project 7: ผ่าตัดแยกไฟล์ (Refactoring to Modules)
+เป้าหมาย: เราจะไม่เขียน Logic ใหม่ แต่เราจะ "ย้ายบ้าน" ให้โค้ด
+ไฟล์ 1 asset_lib.py: เปรียบเหมือน "ห้องครัว" (เก็บสูตรอาหาร, วัตถุดิบ, วิธีปรุง)
+ไฟล์ 2 main.py: เปรียบเหมือน "หน้าร้าน" (รับออเดอร์, เสิร์ฟอาหาร)'''
+
+import asset_lib as lib # <-- import file ที่เราย้าย function ไปไว้
+
+
+def main():
+    while True:
+        # โหลดข้อมูลจาก lib
+        my_assets = lib.load_assets()
+
+        print('\n=== 💻 ระบบทะเบียนคุมทรัพย์สิน IT (IT Asset) ===')
+        print(f'จำนวนรายการทั้งหมด: {len(my_assets)} รายการ')
+        print('[S] แสดงรายการทั้งหมด')
+        print('[A] เพิ่มรายการใหม่')
+        print('[U] อัพเดทสถานะ (ส่งซ่อม/คืน)')
+        print('[D] ลบรายการทรัพย์สิน')
+        print('[Q] ออกจากโปรแกรม')
+
+        choice = input('เลือกคำสั่ง: ').upper().strip()
+
+        if choice == 'S':
+            lib.show_all_assets(my_assets)
+        elif choice == 'A':
+            lib.add_asset(my_assets)
+        elif choice == 'U':
+            lib.update_status(my_assets)
+        elif choice == "D":
+            lib.delete_asset(my_assets)
+        elif choice == 'Q':
+            print('ปิดระบบ... บ๊าย บาย 🙏')
+            break
+        else:
+            print('คำสั่งไม่ถูกต้องครับ')
+
+if __name__ == '__main__':
+    main()
+        

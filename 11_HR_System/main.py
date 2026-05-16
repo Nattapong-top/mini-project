@@ -1,0 +1,41 @@
+'''Project 11: ระบบ HR เงินเดือน (Salary System) 👔💰
+นี่คือ "Final Boss" ของซีรีส์ 5 โปรเจคฝึกกล้ามเนื้อครับ 
+โปรเจคนี้จะรวมทุกสกิลที่ป๋าเรียนมา:
+CRUD: เพิ่ม/ลบ/แก้ไขพนักงาน (เหมือนทะเบียนทรัพย์สิน)
+Logic คำนวณ: คำนวณภาษีและประกันสังคม (เหมือนโปรแกรมตัดเกรด + บัญชีรายรับ)
+Modules: แยกไฟล์ทำงาน (เหมือนสมุดโทรศัพท์)
+Format: การจัดหน้าสลิปเงินเดือนให้สวยงาม'''
+
+import hr_manager as hr
+
+
+def main():
+    while True:
+        my_team = hr.load_employees()
+
+        print('\n=== 🏢 ระบบ HR เงินเดือน (Salary System) ===')
+        print(f'พนักงานทั้งหมด: {len(my_team)} คน')
+        print('[S] ดูรายชื่อพนักงานทั้งหมด')
+        print('[A] เพิ่มพนักงานใหม่ (Recruit)')
+        print('[C] คำนวณ/ออกสลิปเงินเดือน (Slip)')
+        print('[D] ลบข้อมูลพนักงาน (Fire)')
+        print('[Q] ออกจากโปรแกรม')
+
+        choice = input('เลือกคำสั่ง: ').strip().upper()
+
+        if choice == 'S':
+            hr.show_all_employees(my_team)
+        elif choice == 'A':
+            hr.add_employee(my_team)
+        elif choice == 'C':
+            hr.calculate_and_show_slip(my_team)
+        elif choice == 'D':
+            hr.delete_employee(my_team)
+        elif choice == 'Q':
+            print('ปิดระบบ HR... บ๊าย บาย')
+            break
+        else:
+            print('เลือกคำสั่งไม่ถูกต้องครับ!')
+
+if __name__ == '__main__':
+    main()

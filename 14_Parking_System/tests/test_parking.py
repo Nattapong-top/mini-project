@@ -1,0 +1,115 @@
+import pytest
+from datetime import datetime, timedelta
+from domain.models import (
+    ParkingTicket, 
+    LicensePlate, 
+    PricingPolicy, 
+    OverLimitError,
+    MoneyThb)
+
+from domain.services import ParkingRegistrationService
+from domain.barrier_spay import BarrierSpy
+from adapters.InMemoryParkingRepository import InMemoryParkingRepository
+
+
+def test_barrier_should_not_open_if_payment_is_incomplete(fixed_now, standard_policy):
+    # 1. Arrange: เตรียมรถที่จอดอยู่แล้ว (มี Ticket ในระบบ)
+    spy = BarrierSpy()
+    repo = InMemoryParkingRepository()
+    
+    # สมมติว่ามีตั๋วอยู่แล้วในระบบ และมียอดต้องชำระ 40 บาท
+    # ... (เดี๋ยวป๋าลองนึกดูว่าต้องเซ็ตอัพยังไง) ...
+    service = ParkingRegistrationService(spy, repo, standard_policy)
+    entry_time = fixed_now - timedelta(hours=4)
+    ticket_id = ParkingTicket(license_plate=LicensePlate(value='รวย-1111'), entry_time=entry_time)
+    fee = ticket_id.calculate_fee(current_time=fixed_now, Policy=standard_policy)
+
+    # 2. Act: พยายามจะ Check-out โดยไม่จ่ายเงิน
+    payment = MoneyThb(value=0)
+    service.check_out(ticket_id, payment, fee)
+
+    # 3. Assert: พยาน (Spy) ต้องยืนยันว่าไม้กั้น "ปิดสนิท"
+    assert spy.is_open is False, "ป๋า! ลูกค้ายังไม่จ่ายเงิน แต่ไม้กั้นเปิดได้ไง!"
+
+
+def test_barrier_should_open_on_successful_check_in(fixed_now, standard_policy):
+    # 1. Arrange (เตรียมของ)
+    # สมมติเรามี BarrierService ที่คอยสั่งการไม้กั้น
+    # ใน Unit Test เราจะใช้ Mock เพื่อดูว่ามันถูกสั่งให้ "เปิด" หรือไม่
+    barrier_service = BarrierSpy()
+    repo = InMemoryParkingRepository()
+    parking_service = ParkingRegistrationService(barrier=barrier_service, repository=repo, policy=standard_policy)
+
+    license_plate = LicensePlate(value='รวย-1111')
+
+    # 2. Act (ลงมือทำ)
+    # เมื่อรถทำการ Check-in
+    ticket = parking_service.register_entry(license_plate, entry_time=fixed_now)
+    
+    # 3. Assert (ตรวจสอบผล)
+    # ตรวจสอบว่า barrier_service ถูกสั่งให้เปิด (open) จริงๆ ใช่ไหม
+    assert barrier_service.is_open is True
+    assert ticket.license_plate == license_plate
+    
+
+def test_ticket_is_lost_fee_200_over_12_hours(standard_policy, fixed_now) -> int:
+    entry_time = fixed_now - timedelta(hours=14)
+    ticket = ParkingTicket(license_plate=LicensePlate(value='รวย-1111'), entry_time=entry_time)
+    fee = ticket.calculate_fee(current_time=fixed_now, Policy=standard_policy, is_lost=True)
+
+    assert fee == 200
+
+def test_ticket_is_lost_fee_100_under_2_hours(standard_policy, fixed_now) -> int:
+    entry_time = fixed_now - timedelta(hours=1)
+    ticket = ParkingTicket(license_plate=LicensePlate(value='รวย-1111'), entry_time=entry_time)
+    fee = ticket.calculate_fee(current_time=fixed_now, Policy=standard_policy, is_lost=True)
+
+    assert fee == 100
+
+def test_parking_max_daily_is_200_Thb(standard_policy, fixed_now):
+
+    entry_time = fixed_now - timedelta(hours=14)
+    ticket = ParkingTicket(license_plate=LicensePlate(value='รวย-9999'), entry_time=entry_time)
+
+    fee = ticket.calculate_fee(current_time=fixed_now, Policy=standard_policy)
+
+    assert fee == standard_policy.max_daily
+
+def test_parking_ticket_calculate_fee_correctly():
+    # Arrange: รถเข้าจอดเมื่อ 3 ชม. ที่แล้ว (ชั่วโมงละ 20 บาท)
+    my_policy = PricingPolicy(hourly_rate=20)
+    plate = LicensePlate(value='กข-1234')
+    fixed_now = datetime.now()
+    entry_now = fixed_now - timedelta(hours=3)
+    ticket = ParkingTicket(license_plate=plate, entry_time=entry_now)
+
+    # Act: คำนวณค่าธรรมเนียม ฟรี สองชั่งโมงแรก
+    # สมมุติค่าจอดรถ: 3 - 2 ชม. x 20 บาท = 20
+    fee = ticket.calculate_fee(current_time=fixed_now, Policy=my_policy)
+
+    # 3. Assert (ตรวจสอบผลลัพธ์)
+    assert fee == 20
+
+def test_parking_under_2_hours_is_free():
+    # จอด 1 ชม. 30 นาที (ต้องปัดเป็น 2 ชม. และต้องฟรี)
+    my_policy = PricingPolicy(hourly_rate=20)
+    fixed_now = datetime.now()
+    entry_time = fixed_now - timedelta(hours=1, minutes=30)
+    ticket = ParkingTicket(license_plate=LicensePlate(value='ป๋า-9999'), entry_time=entry_time)
+
+    fee = ticket.calculate_fee(current_time=fixed_now, Policy=my_policy)
+
+    assert fee == 0
+
+def test_parking_over_24_hour_should_raise_error():
+    my_policy = PricingPolicy(hour_limit=24)
+    fixed_now = datetime.now()
+    entry_time = fixed_now - timedelta(hours=24, minutes=30)
+    ticket = ParkingTicket(license_plate=LicensePlate(value='ป๋า-9999'), entry_time=entry_time)
+
+    # ใช้ pytest.raises เพื่อดักรอ Error
+    with pytest.raises(OverLimitError) as excinfo:
+        ticket.calculate_fee(current_time=fixed_now, Policy=my_policy)
+
+    # ตรวจสอบว่าข้อความใน Error ตรงกับที่เราตั้งใจไว้ไหม
+    assert str(excinfo.value) == 'จอดเกินเวลา กรุณาติดต่อพนักงาน'

@@ -1,0 +1,109 @@
+'''พร้อมไหมครับ? เราจะไปลุย Project 10: ระบบจองห้องประชุม (Meeting Booking) 
+📅 อันนี้คือ "จุดปราบเซียน" เรื่อง Logic เลยครับ
+โจทย์: ป๋าต้องเช็คให้ได้ว่า "เวลามันชนกันไหม?"
+นาย ก. จอง 09:00 - 11:00
+นาย ข. จะมาจอง 10:00 - 12:00
+ต้องห้ามจอง! เพราะ 10 โมงห้องไม่ว่าง
+เพื่อให้ง่ายต่อการฝึก Logic ผมจะขอใช้หน่วยเวลาเป็น "ตัวเลขชั่วโมง (0-24)" 
+นะครับ (เช่น จอง 9 ถึง 11) เพื่อให้ป๋าเห็นภาพการคำนวณง่ายๆ ครับ'''
+import os
+
+
+script = os.path.dirname(__file__)
+filename = os.path.join(script, "bookings.txt")
+
+def load_booking():
+    '''อ่านข้อมูลการจอง'''
+
+    bookings = []
+    if os.path.exists(filename):
+        with open(filename, encoding='utf-8') as f:
+            for line in f:
+                # Format: ห้อง, ชื่อคนจอง, เริ่ม, จบ
+                parts = line.strip().split(',')
+                if len(parts) == 4:
+                    bookings.append(parts)
+    return bookings
+
+def save_bookings(bookings):
+    with open(filename, 'w', encoding='utf-8') as f:
+        for item in bookings:
+            line = ','.join(item)
+            f.write(line + '\n')
+    print('💾 บันทึกข้อมูลเรียบร้อย!')
+
+def show_schedule(bookings:list):
+    print('\n' + '='*60)
+    print(f"{'No.':>4} {'ห้อง:':<15} {'ผู้จอง':<15} {'เริ่ม':<5} {'จบ':<5}")
+    print('='*60)
+    bookings.sort()
+    for i, item in enumerate(bookings):
+        print(f"{i+1:>4}. {item[0]:<15} {item[1]:<15} {item[2]:<5} {item[3]:<5}")
+    print('='*60)
+
+def check_overlap(new_start, new_end, old_start, old_end):
+    '''
+    function check เวลาชนกัน 
+    คืนค่า True ถ้าชน, False ถ้าไม่ชน
+    '''
+    ns = int(new_start)
+    ne = int(new_end)
+    old_s = int(old_start)
+    oe = int(old_end)
+
+    # แกะโค๊ดว่ามันทำงานยังไง
+    print(f' 🕵️ กำลังเทียบ: ใหม่({ns}-{ne}) vs เก่า({old_s}-{oe})')
+
+    # เช็คเงื่อนไขที่ละข้อ
+    condition1 = (ns < oe)
+    condition2 = (ne > old_s)
+
+    # ดูผลลัพธ์การตรวจสอบเงื่อนไข
+    print(f' --> เริ่มก่อนจบเก่าไหม? {condition1}')
+    print(f' --> จบทีหลังเริ่มก่อนไหม? {condition2}')
+
+    # สูตรเช็คเวลาชนกัน:
+    # "ถ้า เวลาเริ่มใหม่ น้อยกว่า เวลาจบเก่า AND เวลาจบใหม่ มากกว่า เวลาเริ่มเก่า"
+    # แปลว่ามันซ้อนทับกันอยู่
+    if condition1 and condition2:
+        print(' Result: 💥 ชนกันตู้ม!')
+        return True
+    else:
+        print(' Result: ✅ ห้องว่าง')
+        return False
+    
+def book_room(bookings):
+    print('\n--- 📅 จองห้องประชุม ---')
+    room = input('ชื่อห้อง (Meeting1/Meeting2): ').strip()
+    name = input('ชื่อผู้จอง: ').strip()
+
+    try:
+        start = int(input('เวลาเริ่ม (0-23): '))
+        duration = int(input('จองกี่ชั่วโมง: '))
+        end = start + duration
+    except ValueError:
+        print('❌ ใส่ตัวเลขท่านั้นครับ!')
+        return
+    
+    # --- ตรวจสอบว่าห้องว่างไหม? ---
+    is_busy = False
+
+    for item in bookings:
+        # item[0]=ห้อง, item[1]=เริ่ม, item[2]=จบ
+        existing_room = item[0]
+        existing_start = item[2]
+        existing_end = item[3]
+
+        # 1. เช็คว่าเป็นห้องเดียวกันไหม?
+        if existing_room == room:
+            # 2. ถ้าเป็นห้องเดียวกัน ต้องเช็คเวลาต่อ
+            if check_overlap(start, end, existing_start, existing_end):
+                print(f'จองไม่ได้ เวลาชนกับคุณ {item[1]} ({existing_start}-{existing_end})')
+                is_busy = True
+                break
+    if not is_busy:
+        # ถ้าหลุดลูปมาได้โดยไม่ชนใครเลย -> จองได้!
+        # แปลงเป็น str ก่อนเก็บลง list
+        bookings.append([room, name, str(start), str(end)])
+        save_bookings(bookings)
+        print(f'✅ จองห้อง {room} เวลา {start}.00 - {end}.00 สำเร็จ!')

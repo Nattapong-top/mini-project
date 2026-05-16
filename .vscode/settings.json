@@ -1,0 +1,38 @@
+{
+    "workbench.colorTheme": "One Dark Pro",
+    "files.autoSave": "afterDelay",
+    "terminal.integrated.fontFamily": "Fira Code",
+    "editor.mouseWheelZoom": true,
+    "editor.formatOnSave": true,
+    "editor.fontSize": 18,
+    "explorer.confirmDragAndDrop": false,
+    "terminal.integrated.enableMultiLinePasteWarning": "never",
+    "window.menuBarVisibility": "classic",
+    "workbench.editor.editorActionsLocation": "default",
+    "workbench.iconTheme": "material-icon-theme",
+    "editor.fontFamily": "'Fira Code','Fira Code','Fira Code'",
+    "editor.fontLigatures": true,
+    "chat.editor.fontFamily": "Fira Code",
+    "terminal.integrated.fontLigatures.enabled": true,
+    "editor.minimap.enabled": false,
+    "terminal.integrated.fontSize": 16,
+    "workbench.editor.showTabs": "multiple",
+    "terminal.integrated.profiles.windows": {
+        "PowerShell": {
+            "source": "PowerShell",
+            "icon": "terminal-powershell"
+        },
+        "Command Prompt": {
+            "path": [
+                "${env:windir}\\Sysnative\\cmd.exe",
+                "${env:windir}\\System32\\cmd.exe"
+            ],
+            "args": [],
+            "icon": "terminal-cmd"
+        },
+        "Git Bash": {
+            "source": "Git Bash"
+        }
+    }
+    // == !== = != >= ? @ # 
+}

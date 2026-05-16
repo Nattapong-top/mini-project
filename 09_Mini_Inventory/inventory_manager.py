@@ -1,0 +1,144 @@
+'''📦 Project 9: ระบบสต็อกสินค้า (Mini Inventory)
+ความยากที่เพิ่มขึ้น:
+การคำนวณเลข: โปรเจคนี้ไม่ใช่แค่แก้ข้อความ (String) แต่ต้องมีการ บวก/ลบ จำนวนสินค้า (Integer)
+Logic การเบิกของ: ต้องเช็คว่า "ของพอให้เบิกไหม?" (ติดลบไม่ได้)
+มูลค่ารวม: ต้องคำนวณ จำนวน x ราคา เพื่อดูมูลค่าของในโกดัง'''
+
+# รหัสสินค้า,ชื่อสินค้า,จำนวน,ราคา
+
+import os
+
+script_dir = os.path.dirname(__file__)
+filename = os.path.join(script_dir, 'stock.txt')
+
+def load_products():
+    '''อ่านสินค้าที่มีในไฟล์ทั้งหมด'''
+    products = []
+    if os.path.exists(filename):
+        with open(filename, encoding='utf-8') as f:
+            for line in f:
+                parts = line.strip().split(',')
+                if len(parts) == 4:
+                    products.append(parts)
+    return products
+
+def save_products(products:list):
+    '''บันทึกลงไฟล์'''
+    with open(filename, 'w', encoding='utf-8') as f:
+        for item in products:
+            # item คือ [รหัส, ชื่อ, จำนวน, ราคา]
+            # เวลา save ต้องรวมเป็น string คั่นด้วย comma 
+            line = ','.join(item)
+            f.write(line + '\n')
+    print('💾 บันทึกข้อมูลเรียบร้อย!')
+
+def show_all_products(products:list):
+    print('\n' + '='*70)
+    print(f"{'No.':<4} {'รหัส':<10} {'ชื่อสินค้า':<20} {'จำนวน':>10} {'ราคา':>10} {'รวมเงิน':>12}")
+    print('='*70)
+
+    total_value_all = 0 # ตัวแปรเก็บมูลค่ารวมทั้งโกดัง
+
+    for i, item in enumerate(products):
+        qty = int(item[2])          # แปลงเป็น int
+        price = int(item[3])        # แปลงเป็น int
+        total_line = qty * price    # รวมมูลค่า/รายการ
+
+        total_value_all += total_line   # บวกสะสมทุกรายการ เป็นมูลค่ารวมโกดัง
+
+        # item[2] คือจำนวน, item[3] คือราคา
+        # ใช้ > เพื่อจัดชิดขวาให้ตัวเลขตรงหลัก
+        print(f'{str(i+1)+'.'} {item[0]:<10} {item[1]:<20} {qty:>8,} {price:>8,} {total_line:>12,}')
+    print('='*70)
+    print(f"{'มูลค่ารวมสินค้าในโกดังทั้งสิน':<50} {total_value_all:>15,} บาท")
+    print('='*70)
+
+def add_product(products):
+    print('\n--- ➕ เพิ่มรหัสสินค้าใหม่ ---')
+    code = input('รหัสสินค้า (P01): ').strip().upper()
+
+    # เช็คซ้ำ
+    for item in products:
+        if item[0] == code:
+            print(f'รหัสสินค้า {item[0]} มีในระบบแล้ว')
+            return
+    
+    name = input('ชื่อสินค้า: ').strip()
+
+    while True:
+        qty = input('จำนวนเริ่มต้น: ').strip()
+        if not qty.isdigit():
+            print('ป้อนจำนวนเป็นตัวเลขเท่านั้นครับ')
+        else:
+            break
+    
+    while True:
+        price = input('ราคาต่อชิ้น: ').strip()
+        if not price.isdigit():
+            print('ป้อนราคาเป็นตัวเลขเท่านั้นครับ')
+        else:
+            break
+
+    # บันทึกเป็น string ไปก่อน (เดี๋ยวตอนคำนวณค่อยแปลง)
+    products.append([code, name, qty, price])
+    save_products(products)
+    print(f'✅ เพิ่ม {name} เข้าสต๊อกแล้ว')
+
+def update_stock(products:list):
+    '''รับเข้า/เบิกออก'''
+    print('\n--- 📦 ปรับปรุงสต๊อก ---')
+    target_code = input('รหัสสินค้า: ').strip().upper()
+
+    found = False
+
+    for item in products:
+        if item[0] == target_code:
+            print(f'สินค้า: {item[1]} | จำนวนปัจจุบัน: {item[2]} ชิ้น')
+
+            print('[1] รับสินค้าเข้า (+)')
+            print('[2] เบิกสินค้าออก (-)')
+            action = input('เลือกรายการ: ').strip()
+
+            while True:
+                amount_str = input('จำนวนกี่ชิ้น: ')
+                if not amount_str.isdigit():
+                    print('❌ ใส่ตัวเลขเท่านั้น')
+                else:
+                    break
+            amount = int(amount_str)    # จำนวนที่จะทำรายการ
+            current_qty = int(item[2])  # จำนวนของเดิม (ต้องแปลงเป็น int ก่อน!)
+
+            if action == '1':
+                # --- (A) โซนรับเข้า ---
+                # ป๋าต้องเติม code ตรงนี้: เอาของเดิม + ของใหม่
+                # new_qty = current_qty + amount     
+                new_qty = current_qty + amount
+                print(f'รับเข้า {amount} ชิ้น')           
+            
+            elif action == '2':
+                # --- (B) โซนเบิกออก ---
+                # ป๋าต้องเช็คก่อนว่า ของพอให้เบิกไหม?
+                if amount > current_qty:
+                    print(f'❌ ของไม่พอ (มีแค่ {current_qty} ชิ้น)')
+                    return # ออกจ้า def ไม่บันทึก
+                
+                # ถ้าพอ ก็ลบเลย
+                new_qty = current_qty - amount
+                print(f'เบิกออกไป {amount} ชิ้น')
+            
+            else:
+                print('❌ เลือกผิด')
+                return
+
+            # --- (C) จุดสำคัญ: อัปเดตกลับเข้าไปใน List ---
+            # ต้องแปลงกลับเป็น String ก่อนเก็บลง list เพราะ function save เรา save เป็น string
+            item[2] = str(new_qty)
+
+            found = True
+            print(f'✅ ยอดคงเหลือใหม่: {new_qty} ชิ้น')
+            save_products(products) # บันทึกข้อมูลที่แก้ไขแล้วกลับเข้าไปในไฟล์
+            break
+    
+    if not found:
+        print('❌ ไม่พบสินค้ารหัสนี้')
+                

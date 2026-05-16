@@ -1,0 +1,198 @@
+'''🧠 Logic การคำนวณ (Business Logic)
+เพื่อให้สมจริง (แบบย่อ) เราจะใช้กติกานี้ครับ:
+ประกันสังคม (SSO): หัก 5% ของเงินเดือน (แต่สูงสุดไม่เกิน 750 บาท)
+ภาษี (Tax): คิดแบบขั้นบันไดง่ายๆ
+เงินเดือนไม่เกิน 20,000 = ไม่เสียภาษี
+เกิน 20,000 = หัก 3%
+เกิน 50,000 = หัก 5% (คนรวยจ่ายเยอะหน่อย)
+เงินสุทธิ (Net Salary): เงินเดือน - ประกันสังคม - ภาษี'''
+
+import os
+
+
+script_dir = os.path.dirname(__file__)
+filename = os.path.join(script_dir, 'employees.txt')
+
+def load_employees():
+    '''อ่านข้อมูลพนักงาน: รหัส, ชื่อ, เงินเดือน, ตำแหน่ง'''
+    employees = []
+    if os.path.exists(filename):
+        with open(filename, encoding='utf-8') as f:
+            for line in f:
+                parts = line.strip().split(',')
+                employees.append(parts)
+    return employees
+
+def save_employees(employees:list):
+    '''บันทึกข้อมูลใน list เข้าไปเก็บไว้ใน file'''
+    with open(filename, 'w', encoding='utf-8') as f:
+        for item in employees:
+            line = ','.join(item)
+            f.write(line + '\n')
+    print('💾 บันทึกข้อเรียบร้อย!')
+
+def add_employee(employees:list):
+    print('\n --- ➕ เพิ่มพนักงานใหม่ ---')
+    emp_id = input('รหัสพนักงาน (EMP01): ').strip().upper()
+
+    for item in employees:
+        if item[0] == emp_id:
+            print('❌ รหัสนี้มีอยู่แล้ว')
+            return
+
+    name = input('ชื่อ-นามสกุล: ').strip()
+
+    while True:
+        sarary_str = input('เงินเดือน (บาท): ').strip()
+        if sarary_str.isdigit():
+            break
+        print('❌ ใส่ตัวเลขเท่านั้นครับ!')
+    
+    position = input('ตำแหน่งงาน: ').strip()
+
+    # เก็บ List (salary เก็บเป็น str ไปก่อนเพือนให้ save ง่าย)
+    employees.append([emp_id, name, sarary_str, position])
+    save_employees(employees)
+    print(f'✅ ยินดีต้อนรับคุณ {name} สู่ทีม')
+
+def delete_employee(employees:list):
+    print('\n---🗑️ ลบข้อมูลพนักงาน ---')
+    target_id = input('ป้อนรหัสพนักงานที่จะลบ: ').strip().upper()
+
+    found = False
+    for item in employees:
+        if item[0] == target_id:
+            print(f'เจอคุณ: {item[1]} (ตำแหน่ง: {item[3]})')
+            confirm = input('ยืนยันการลาออก (y/n): ').lower()
+            if confirm == 'y':
+                employees.remove(item)
+                found = True
+                print('✅ ลบเรียบร้อย')
+                break
+            else:
+                return
+    
+    if found:
+        save_employees(employees)
+    else:
+        print('❌ ไม่พบรหัสนี้')
+
+def show_all_employees(employees:list):
+    print('\n' + '='*70)
+    print(f"{'ID':<8} {'ชื่อ-สกุล':<25} {'ตำแหน่ง':<15} {'เงินเดือน':10}")
+    print('='*70)
+    for item in employees:
+        salary_fmt = f"{int(item[2]):,}"
+        print(f"{item[0]:<8} {item[1]:<25} {item[3]} {salary_fmt:>10}")
+    print('='*70)
+
+def calculate_and_show_slip(employees:list):
+    '''function คำนวณเงินเดือน (สลิป)'''
+    print('\n--- 💸 ออกสลิปเงินเดือน ---')
+    target_id = input('ป้อนรหัสพนักงาน: ').strip().upper()
+
+    found = False
+    for item in employees:
+        if item[0] == target_id:
+            found = True
+            name = item[1]
+            salary = int(item[2])   # แปลงเป็นตัวเลขเพื่อคำนวณ
+            position = item[3]
+
+            # --- 🧠 Logic การคำนวณ ---
+
+            # 1. ประกันสังคน 5% (สูงสุดไม่เกิน 750)
+            sso = salary * 0.05
+            if sso > 750:
+                sso = 750
+            
+            # --- จุดเปลี่ยน: ให้ป๋าเลือกโหมด ---
+            print(f'\nกำลังคำนวณภาษีของคุณ {name} (เงินเดือน {salary:,})')
+            print('[1] แบบง่าย (เหมาจ่าย 3-5%)')
+            print('[2] แบบจริงจัง (ขั้นบันได + ลดหย่อน)')
+            mode = input('เลือกวิธีคำนวณ: ').strip()
+
+            # 2. ภาษี (Step Tax)
+            tax = 0
+            if mode == '2':
+                # เรียกใช้ def real world
+                tax = calculate_tax_real_world(salary, sso)
+                print('--> ใช้สูตรสรรพากร (ขันบันได)')
+            else:
+                if salary > 50000:
+                    tax = salary * 0.05     # 5%
+                elif salary > 20000:
+                    tax = salary * 0.03     # 3%
+                print('--> ใข้สูตรเหมาจ่ายแบบง่าย')            
+            
+            # 3. เงินสุุทธิ
+            net_salary = salary - sso - tax
+
+            # --- แสดงผลสลิปแบบมืออาชีพ ---
+            print('\n' + '*'*40)
+            print(f'📄 SLIP เงินเดือน: {name} ({position})')
+            print('*'*40)
+            print(f'💵 เงินเดือนพื้นฐาน: {salary:>10,} บาท')
+            print(f'➖ หักประกันสังคม: {sso:>10,.2f} บาท')
+            print(f'➖ หักภาษี ณ ที่จ่าย: {tax:>10,.2f} บาท')
+            print('-' * 40)
+            print(f'💰 เงินรับสุทธิ: {net_salary:>10,.2f} บาท')
+            print('-' * 40)
+            break
+
+    if not found:
+        print('❌ ไม่พบพนักงานรหัสนี้')
+
+def calculate_tax_real_world(salary, sso_monthly):
+    """
+    ฟังก์ชันเสริม: คำนวณภาษีแบบขั้นบันได (ของจริง)
+    คืนค่าเป็น ภาษีที่ต้องจ่ายต่อเดือน
+    """
+    # 1. คิดรายได้ทั้งปี
+    year_salary = salary * 12
+    sso_year = sso_monthly * 12
+
+    # 2. หักค่าใช้จ่าย (50% ไม่เกิน 100,000)
+    expense = year_salary * 0.5
+    if expense > 100000:
+        expense = 100000
+
+    # 3. หักลดหย่อนส่วนตัว (60,000)
+    perssonal = 60000
+
+    # 4. เงินได้สุทธิ (Net Income)
+    net_income = year_salary - expense - perssonal - sso_year
+
+    # 5. คำนวณตามขั้นบันได
+    tax_year = 0
+
+    # ถ้าเงินสุทธิไม่ถึง 150,000 = ฟรีภาษี
+    if net_income <= 150000:
+        return 0
+    
+    # ตัด 150,000 แรกทิ้ง (เพราะฟรี)
+    remain = net_income - 150000
+
+    # ขั้นที่ 1: 150,001 - 300,000 (คิด 5%) -> ช่วงกว้าง 150,000
+    step1 = 150000
+    if remain < 150000:
+        step1 = remain
+    
+    tax_year += step1 * 0.05
+    remain -= step1
+
+    # ขั้นที่ 2: 300,001 - 500,000 (คิด 10%) -> ช่วงกว้าง 200,000
+    if remain > 0:
+        step2 = 200000
+        if remain < 200000:
+            step2 = remain
+
+        tax_year  += step2 * 0.10
+        remain -= step2
+    
+    # ขั้นที่ 3: 500,001 ขึ้นไป (สมมติคิด 15% ยาวๆ)
+    if remain > 0:
+        tax_year += remain * 0.15
+    
+    # หาร 12 เพื่อเป็นยอดจ่ายรายเดือน
+    return tax_year / 12

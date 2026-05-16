@@ -1,0 +1,174 @@
+'''Project 8: สมุดโทรศัพท์ (Contact Book)
+เป้าหมาย: สร้างสมุดโทรศัพท์ที่เก็บ ชื่อ, เบอร์โทร, อีเมล และแยกการทำงานเป็นสัดส่วน'''
+
+import os
+
+# 
+script_dir = os.path.dirname(__file__)
+filename = os.path.join(script_dir, 'contract.txt')
+
+def load_contracts():
+    '''อ่านรายชื่อทั้งหมดจากไฟล์'''
+    contract = []
+    if os.path.exists(filename):
+        with open(filename, encoding='utf-8') as f:
+            for line in f:
+                # รูปแบบ: ชื่อ,เบอร์โทร,อีเมล
+                parts = line.strip().split(',')
+                # เช็คก่อนว่าตรงตามรูปแบบไหม
+                if len(parts) == 3:
+                    contract.append(parts)
+    return contract
+
+def save_contracts(contracts:list):
+    '''บันทึกข้อมูลทับลงไฟล์'''
+    with open(filename, 'w', encoding='utf-8') as f:
+        for item in contracts:
+            line = ','.join(item)
+            f.write(line + '\n')
+    print('💾 บันทึกข้อมูลเรียบร้อย!')
+
+def show_all_contracts(contracts:list):
+    '''แสดงรายชื่อแบบตาราง'''
+    print('\n' + '='*60)
+    print(f"{'No.':<4} {'ชื่อ':<25} {'เบอร์โทร':<15} {'อีเมล':<20}")
+    print('='*60)
+
+    if not contracts:
+        print(" (สมุดโทรศัพท์ว่างเปล่า)")
+    else:
+        for i, item in enumerate(contracts):
+            # i=No. item[0]=ชื่อ, item[1]=เบอร์โทร, item[2]=email
+            print(f'{i+1:<4} {item[0]:<23} {item[1]:<15} {item[2]:<20}')
+            print('='*60)
+
+def add_contract(contracts:list):
+    '''เพิ่มรายชื่อใหม่'''
+    print('\n--- ➕ เพิ่มรายชื่อใหม่ ---')
+    name = input('ชื่อ-นามสกุล: ').strip()
+
+    # เช็คว่าชื่อว่างไหม
+    if not name:
+        print('ใส่ชื่อด้วยครับ!')
+        return
+
+    for item in contracts:
+        if item[0] == name:
+            print(f'❌ ชื่อ {name} มีอยู่แล้วครับ')
+            return
+
+    phone = input('เบอร์โทร: ').strip()
+    email = input('อีเมล (ถ้าไม่มีกด Enter): ').strip()
+
+    # ถ้าไม่มีอีเมล ให้ใส่ - แทน
+    if not email:
+        email = '-'
+
+    # เพิ่มลง list และ save
+    contracts.append([name, phone, email])
+    save_contracts(contracts)
+    print(f'✅ บันทึกคุณ {name} เรียบร้อย!')
+
+
+def delete_contract(contracts:list):
+    '''ลบรายชื่อ'''
+    target_contract = input('ป้อนชื่อที่ต้องการลบ: ').strip()
+
+    found = False
+
+    # วันลูปหาชื่อที่จะลบ
+    for item in contracts:
+        if item[0] == target_contract:
+            print(f'เจอรายชื่อ {item[0]} เบอร์โทร {item[1]} ที่จะลบ')
+
+            confirm = input('ยืนยันการลบไหม? (y/n): ').strip().lower()
+
+            if confirm == 'y':
+                contracts.remove(item)
+                found = True
+                print('✅ ลบเรียบร้อยแล้ว!')
+                break
+            else:
+                print('ยกเลิกการลบครับ')
+                return
+    if found:
+        save_contracts(contracts)
+    else:
+        print('❌ ไม่พบรายชื่อนี้ครับ')
+
+def update_contract(contracts:list):
+    '''ค้นหาชื่อก่อน แล้วค่อยเลือกว่าจะแก้ไขอะไร (เขียนครั้งเดียว ครบทุกฟังก์ชัน)'''
+    print('\n--- 🔧 แก้ไขข้อมูลรายชื่อ ---')
+    target_name = input('ป้อนชื่อคนที่ต้องการแก้ไข: ').strip()
+    found = False
+
+    # 1. วนลูปหาตัวให้เจอก่อน
+    for item in contracts:
+        # item[0]=ชื่อ, item[1]=เบอร์, item[2]=อีเมล
+        if item[0] == target_name:
+            print(f'\n✅ เจอแล้ว: {item[0]} | {item[1]} | {item[2]}')
+                
+            while True:
+                print('-------------------')
+                print(f'คุณต้องการแก้ไขอะไรของ "{item[0]}" ?')
+                print('[1] แก้ไขชื่อ')
+                print('[2] แก้ไขเบอร์โทร')
+                print('[3] แก้ไขอีเมล')
+                print('[0] ยกเลิก/เสร็จสิ้น')
+                
+                choice = input('เลือกข้อ: ').strip()
+
+                if choice == '1':
+                    new_name = input('ชื่อใหม่: ')
+                    if new_name:
+                        item[0] = new_name
+                        print('--> เปลียนชื่อเรียบร้อย')
+
+                elif choice == "2":
+                    new_phone = input('เบอร์โทรใหม่: ').strip()
+                    if new_name:
+                        item[1] = new_phone
+                        print('--> เปลี่ยนเบอร์โทรเรียบร้อย')
+
+                elif choice == '3':
+                    new_email = input('อีเมลใหม่: ')
+                    if new_email:
+                        item[2] = new_email
+                        print('--> เปลี่ยนอีเมลเรียบร้อย')
+
+                elif choice == '0':
+                    break
+                
+                else:
+                    print('❌ เลือกไม่ถูกต้อง!')
+            
+            found = True
+            save_contracts(contracts)
+            print('💾 อัพเดทข้อมูลลงไฟล์เรียบร้อย!')
+            break
+    
+    if not found:
+        print(f'❌ ไม่พบชื่อ "{target_name}" ในสมุดโทรศัพท์ครับ')
+
+def search_contract(contracts: list):
+    print('\n--- 🔍 ค้นหารายชื่อ ---')
+    keyword = input('พิมพ์คำค้นหา (ชื่อ/เบอร์โทร/อีเมล): ').strip().lower()
+
+    found_list = [] # เพิ่มคนที่หาเจอเก็บไว้ใน list
+
+    for item in contracts:
+        # item[0]=ชื่อ, item[1]=เบอร์โทร, item[2]=อีเมล
+        # เอาข้อมูลมาต่อกันเป็นก้อนเดียว แล้วเช็คว่ามี keyword ซ่อนอยู่ไหม
+        # เช่น "Somchai0812345678som@mail.com"
+        full_text = str(item[0] + item[1] + item[2]).lower()
+
+        if keyword in full_text: # ถ้ามี keyword เป็นส่วนหนึ่งของ full_text
+            found_list.append(item) # เก็บใส่ list
+        
+    if found_list:
+        print(f'\n✅ เจอทั้งหมด {len(found_list)} รายการ: ')
+        # เรียกใช้ function ที่เรามีอยู่คือ show_contracts() มาใช้งานได้เลย (Reusability)
+        show_all_contracts(found_list)
+    else:
+        print('❌ ไม่พบข้อมูลที่ตรงกันครับ')
+

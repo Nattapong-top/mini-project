@@ -1,0 +1,117 @@
+'''โปรเจคที่ 4: สมุดบันทึกรายรับ-รายจ่าย (Expense Tracker)
+เป้าหมาย: เริ่มซับซ้อนขึ้น คล้าย POS แต่เน้นการดูย้อนหลัง
+ฟังก์ชัน: ลงบันทึก (วันที่, รายการ, จำนวนเงิน) -> ดูประวัติย้อนหลัง -> สรุปยอดรวมทั้งหมดจากไฟล์
+สกิลที่ได้: การจัดการ String ขั้นสูง (จัดการวันที่), การอ่านไฟล์มาคำนวณผลรวม'''
+
+import os
+import datetime
+
+# ตั้งค่า path file 
+script_dir = os.path.dirname(__file__)
+filename = os.path.join(script_dir, 'expenses.txt')
+
+# สร้าง function เช็คยอดเงินคงเหลือ
+def get_current_balance():
+    '''อ่านไฟล์แล้วคำนวณเงินคงเหลือส่งกลับมา (Rrturn int)'''
+    total = 0
+    if os.path.exists(filename):
+        with open(filename, encoding='utf-8') as f:
+            for line in f:
+                parts = line.strip().split(',')
+                if len(parts) == 3:
+                    total += int(parts[2])
+    return total # ส่งค่าตัวเลขกลับไปให้คนเรียกใช้
+
+# สร้าง function บันทึกรายการใช้จ่าย
+def add_transaction():
+    print('\n--- 💰 บันทึกรายรับ รายจ่าย ---')
+    desc = input('ใส่รายการ รับ-จ่าย (เงินเดือน, ซื้อของ): ')
+
+    # เช็กก่อนว่าเป็นตัวเลขหรือไม่
+    amount_str = input('จำนวนเงิน: ')
+    if not amount_str.isdigit():
+        print('ใส่ตัวเลขเท่านั้นครับ')
+        return
+    
+    # ถ้าเป็นตัวเลข ให้แปลงเป็น int
+    amount = int(amount_str)
+
+    # ถามผู้ใช้ว่าเป็นรายรับหรือรายจ่าย
+    print('ประเภท: [1] รายรับ 🟢 [2] รายจ่าย 🔴')
+    Type = input('เลือก: ').strip()
+
+    if Type == '2':
+        # เช็คยอดเงิน ก่อนใช้จ่าย 
+        current_money = get_current_balance()
+        # ถ้ายอดเงินไม่พอ แจ้งขาดเท่าไร ยอดประจุบัน และยอดที่จะใช้
+        if amount > current_money:
+            print(f'❌ ยอดเงินไมเพียงพอ! {amount - current_money} บาท')
+            print(f' ยอดเงินปัจจุบัน {current_money} บาท ยอดเงินที่จะใช้ {amount} บาท')
+            return
+        
+        amount = amount * -1    # แปลงเป็นค่าติดลบ
+
+    elif Type != '1':
+        print('❌ เลือกผิด ยกเลิกรายการ')
+        return
+    
+    # หาวันที่ปัจจุุบัน
+    date_now = datetime.datetime.now().strftime('%Y-%m-%d')
+
+    with open(filename, 'a', encoding='utf-8') as f:
+        f.write(f'{date_now},{desc},{amount}\n')
+
+    print(' บันทึกเรียบร้อย!')
+
+def show_history_and_balance():
+    print('\n' + '='*40)
+    print('🧾 ประวัติการเงินของป๋า')
+    print('='*40)
+
+    total_balance = 0   # ตัวแปรเก็บยอดเงินสะสม
+
+    # เช็คว่ามีไฟล์อยู่หรือไม่
+    if os.path.exists(filename):
+        # เปิดไฟล์อ่านที่ละบรรทัด
+        with open(filename, encoding='utf-8') as f:
+            for line in f:
+                # แบ่งข้อความออกเป็นส่วนๆเก็บในตัวแปล
+                parts = line.strip().split(',')
+
+                # เช็คว่ามีข้อความ สามชุดตามที่เรากรอกเข้าไปหรือไม่
+                if len(parts) == 3:
+                    date = parts[0]
+                    desc = parts[1]
+                    amount = int(parts[2])
+
+                    # บวกยอดสะสม
+                    total_balance += amount
+
+                    # จัดหน้าแสดงผล 
+                    icon = "🟢" if amount >= 0 else "🔴"
+                    print(f'{date} | {icon} {desc:<20} {amount:>8,} บาท')
+    else:
+        print('   (ยังไม่มีรายการ)')      
+    print('-' * 40)
+    print(f'💰 ยอดเงินคงเหลือ: {total_balance} บาท')
+    print('=' * 40)
+
+
+def main():
+    while True:
+        # โชว์ยอดเงินทุกครั้งที่กลับมาหน้าหลัก
+        show_history_and_balance()
+
+        print('\n[A] เพิ่มรายการ [Q] ออกจากโปรแกรม')
+        choice = input('คำสั่ง: ').upper().strip()
+
+        if choice == 'A':
+            add_transaction()
+        elif choice == 'Q':
+            print('เก็บเงินเยอะๆ นะครับป๋า จะได้มีเงินจ่ายหนี 🙏')
+            break
+        else:
+            print('พิมพ์ไม่ถูกครับ!')
+
+if __name__ == '__main__':
+    main()
